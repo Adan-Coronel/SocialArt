@@ -1,0 +1,23 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="utf-8")
+    title= titulo
+    link(rel="stylesheet", href="/login.css")
+  body
+    nav.menu 
+      ul 
+        li 
+        
+    .login
+      .login-contenedor
+          .encabezado 
+              h1 Bienvenido 
+          form.formulario(action = "/login" methodo= "POST")
+              .contForm   
+                  label(for="user_text") Usuario 
+                  input#user_text(type="text" name="nombreUsuario" placeholder="Ingrese su usuario") 
+                  br
+                  label(for="pass_text") Contraseña
+                  input#pass_text(type="password" name="usuarioContraseña" placeholder="Ingrese su contraseña") 
+              button(type="submit") Iniciar sesión 
