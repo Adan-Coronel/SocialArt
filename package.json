@@ -5,7 +5,8 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",
     "nodemon": "^3.1.10",
-    "pug": "^3.0.3"
+    "pug": "^3.0.3",
+    "sequelize": "^6.37.7"
   },
   "name": "final",
   "version": "1.0.0",
@@ -13,7 +14,8 @@
   "scripts": {
     "build:views": "pug views/ --out public",
     "start": "nodemon server/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "node ./node_modules/tailwindcss/lib/cli.js -i public/styles.css -o public/output.css --watch"
   },
   "keywords": [],
   "author": "",

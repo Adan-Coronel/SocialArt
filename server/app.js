@@ -5,7 +5,7 @@ const app = express()
 const PORT = 3000
 
 
-require(`../data/db`)
+require(`../config/db`)
 
 app.use(express.urlencoded({ extended: true }))
 

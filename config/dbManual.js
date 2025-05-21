@@ -6,7 +6,7 @@ var connection = mysql.createConnection({
 host: 'localhost',
 user: 'root',
 password: '',
-database: 'datab',
+database: 'socialart',
 port: 3306
 });
 connection.connect(function(error){
