@@ -3,7 +3,7 @@ const sequelize = require('../config/db');
 
 const User= sequelize.define('User', {
 
-    id:{
+    idUser:{
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey:true
@@ -36,4 +36,5 @@ const User= sequelize.define('User', {
     tableName: 'users',
     timestamps: false
 }
-)
+);
+module.exports=User;

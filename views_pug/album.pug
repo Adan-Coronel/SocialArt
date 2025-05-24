@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1 Álbum: #{album.titulo}
+
+  if images.length
+    each img in images
+      div
+        img(src=img.url, width="300")
+        if img.caption
+          p= img.caption
+  else
+    p No hay imágenes aún en este álbum.

@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1 Subir imagen al álbum
+
+  form(action=`/albums/${album.id}/upload` method="POST" enctype="multipart/form-data")
+    label Imagen:
+    input(type="file" name="imagen" required)
+
+    label Descripción:
+    input(type="text" name="caption" placeholder="Texto opcional")
+
+    button(type="submit") Subir imagen

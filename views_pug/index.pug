@@ -1,23 +1,57 @@
 doctype html
 html(lang="es")
   head
-    meta(charset="utf-8")
-    title= titulo
-    link(rel="stylesheet", href="/login.css")
+    meta(charset="UTF-8")
+    title SocialArt
+    link(rel="stylesheet", href="/index.css")
+    script(src="/modal.js" defer)
   body
-    nav.menu 
-      ul 
-        li 
-        
-    .login
-      .login-contenedor
-          .encabezado 
-              h1 Bienvenido 
-          form.formulario(action = "/login" methodo= "POST")
-              .contForm   
-                  label(for="user_text") Usuario 
-                  input#user_text(type="text" name="nombreUsuario" placeholder="Ingrese su usuario") 
-                  br
-                  label(for="pass_text") Contraseña
-                  input#pass_text(type="password" name="usuarioContraseña" placeholder="Ingrese su contraseña") 
-              button(type="submit") Iniciar sesión 
+    .contenedor
+      .izquierda
+        h1 SocialArt
+
+      .derecha
+        button(onclick="abrirModal('loginModal')") Ingresá con tu cuenta
+        button(onclick="abrirModal('registroModal')") ¿Todavía no tenés cuenta? ¡Unite!
+        button(onclick="window.location.href='/invitado'") Entrar como invitado
+
+    .modal#loginModal
+      .modal-contenido
+        button.cerrar(onclick="cerrarModal('loginModal')") ✖
+        form(action="/login" method="POST" class="formulario")
+          h2 Iniciar sesión
+          if errorLogin
+            p(style="color: red")= errorLogin
+          label Email
+            input(type="email" name="usuarioMail" required)
+          label Contraseña
+          input(type="password" name="usuarioContraseña" required)
+          button(type="submit") Entrar
+
+    .modal#registroModal
+      .modal-contenido
+        button.cerrar(onclick="cerrarModal('registroModal')") ✖
+        form(action="/registro" method="POST" class="formulario")
+          h2 Crear cuenta
+          if errorRegistro
+              p(style="color: red")= errorRegistro
+          label Nombre completo o alias artistico
+          input(type="text" name="nombreUsuario" required)
+          label Email
+          input(type="text" name="usuarioMail" required)
+          label Contraseña
+          input(type="password" name="usuarioContraseña" required)
+          label Confirmar contraseña
+          input(type="password" name="vUsuarioContraseña" required)
+          button(type="submit") Registrarme
+
+    if errorRegistro
+        script.
+            document.addEventListener('DOMContentLoaded', () => {
+                abrirModal('registroModal');
+            });
+    if errorLogin
+        script.
+            document.addEventListener('DOMContentLoaded', () => {
+                abrirModal('loginModal');
+            });
