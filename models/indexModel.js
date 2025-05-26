@@ -9,8 +9,8 @@ const ImageTag = require('./imageTagModel');
 
 //Relationshops
 // Usuario → Álbumes
-User.hasMany(Album, { foreignKey: 'user_id' });
-Album.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Album, { foreignKey: 'user_id', as: 'albums'});
+Album.belongsTo(User, { foreignKey: 'user_id', as: 'propietario' });
 
 // Álbum → Imágenes
 Album.hasMany(Image, { foreignKey: 'album_id' });

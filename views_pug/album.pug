@@ -1,13 +1,24 @@
 extends layout
 
 block content
-  h1 Álbum: #{album.titulo}
+  h1 Álbum "#{album.titulo}"
+  h2 Subir nueva imagen
+  form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
+    label Imagen:
+    input(type="file", name="imagen", required)
 
-  if images.length
-    each img in images
+    label Descripción:
+    input(type="text", name="caption", placeholder="Texto opcional")
+
+    button(type="submit") Subir imagen
+
+  hr
+  h2 Imágenes
+  if imagenes.length
+    each img in imagenes
       div
         img(src=img.url, width="300")
         if img.caption
           p= img.caption
   else
-    p No hay imágenes aún en este álbum.
+    p No hay imágenes todavía en este álbum.

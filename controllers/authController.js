@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
-
+const { User } = require('../models/indexModel');
+require('dotenv').config();
 const registrarUsuario = async (req, res) => {
     const { nombreUsuario, usuarioMail, usuarioContraseña, vUsuarioContraseña } = req.body;
 
@@ -62,11 +62,11 @@ const loginUsuario = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({ id: user.id }, 'clave_secreta', { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.idUser }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, { httpOnly: true });
         res.redirect('/perfil');
     } catch (err) {
-        console.error(err);
+        console.error('Ves este error desde authController.js desppues borrar.', err);
         res.status(500).send('Error interno');
     }
 };

@@ -7,8 +7,7 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('../routes/authRoute');
 const imageRoutes = require('../routes/imageRoute');
 const albumRoutes = require('../routes/albumRoute');
-
-require(`../config/db`)
+const perfilRoutes = require('../routes/perfilRoute');
 
 
 app.use(express.urlencoded({ extended: true }))
@@ -19,6 +18,8 @@ app.use(cookieParser());
 app.use('/', authRoutes);
 app.use('/albums', imageRoutes)
 app.use('/albums', albumRoutes)
+app.use('/perfil', perfilRoutes);
+
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '../views_pug'))
 

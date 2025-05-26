@@ -1,0 +1,83 @@
+extends layout
+
+block content
+  h1 Bienvenida, #{user.nombre}
+
+  if user.foto
+    img(src=user.foto width="150")
+
+  p Intereses: #{user.intereses}
+
+  button(onclick="mostrarModalEditar()") Editar perfil
+
+  h2 Tus álbumes
+  button(onclick="mostrarModalAlbum()") Crear nuevo álbum
+
+  if user.albums.length
+    each album in user.albums
+      div
+        h3= album.titulo
+        if album.is_public
+          span (Público)
+        a(href=`/albums/${album.idAlbum}`) Ver
+        button(type="button", onclick=`abrirModalEliminar(${album.idAlbum})`) Eliminar
+  else
+    p Todavía no tenés álbumes.
+
+  .modal#modalAlbum
+    .modal-fondo(onclick="cerrarModalAlbum()")
+    .modal-contenido
+      h2 Nuevo álbum
+      form(action="/albums", method="POST")
+        label Título:
+        input(type="text", name="titulo", required)
+
+        label Público:
+        input(type="checkbox", name="is_public")
+
+        button(type="submit") Crear
+        button(type="button", onclick="cerrarModalAlbum()") Cancelar
+
+  .modal#modalEditar
+    .modal-fondo(onclick="cerrarModalEditar()")
+    .modal-contenido
+      h2 Editar perfil
+      form(action="/perfil/editar", method="POST", enctype="multipart/form-data")
+        label Nombre:
+        input(type="text", name="nombre", value=user.nombre)
+
+        label Intereses:
+        input(type="text", name="intereses", value=user.intereses)
+
+        label Foto de perfil:
+        input(type="file", name="foto")
+
+        button(type="submit") Guardar
+        button(type="button", onclick="cerrarModalEditar()") Cancelar
+  .modal#modalEliminar
+    .modal-fondo(onclick="cerrarModalEliminar()")
+    .modal-contenido
+      h2 ¿Estás segura de que querés eliminar este álbum?
+      form(id="formEliminar", method="POST")
+        button(type="submit") Confirmar
+        button(type="button", onclick="cerrarModalEliminar()") Cancelar
+  script.
+    function mostrarModalAlbum() {
+      document.getElementById('modalAlbum').style.display = 'flex';
+    }
+    function cerrarModalAlbum() {
+      document.getElementById('modalAlbum').style.display = 'none';
+    }
+    function mostrarModalEditar() {
+      document.getElementById('modalEditar').style.display = 'flex';
+    }
+    function cerrarModalEditar() {
+      document.getElementById('modalEditar').style.display = 'none';
+    }
+    function abrirModalEliminar(id) {
+      document.getElementById('modalEliminar').style.display = 'flex';
+      document.getElementById('formEliminar').action = `/albums/${id}/eliminar`;
+    }
+    function cerrarModalEliminar() {
+      document.getElementById('modalEliminar').style.display = 'none';
+    }

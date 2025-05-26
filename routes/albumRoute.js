@@ -1,13 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const Album = require('../models/albumModel');
-const Image = require('../models/imageModel');
+const { verificarToken } = require('../middlewares/auth');
+const { verAlbum, crearAlbum, eliminarAlbum } = require('../controllers/albumController');
 
-router.get('/:id', async (req, res) => {
-  const album = await Album.findByPk(req.params.id);
-  const images = await Image.findAll({ where: { album_id: req.params.id} });
-
-  res.render('album', { album, images });
-});
-
+router.get('/:id', verificarToken, verAlbum);
+router.post('/', verificarToken, crearAlbum);
+router.post('/:id/eliminar', verificarToken, eliminarAlbum);
 module.exports = router;

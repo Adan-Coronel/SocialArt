@@ -5,18 +5,19 @@ html(lang="es")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title SocialArt | Red social para artesanos
     link(rel="stylesheet", href="/login.css") 
-
+    link(rel="stylesheet", href="/perfil.css")
   body
     header
-      nav
-        ul
+      nav.navbar
+        ul.nav-left
           li: a(href="/") Inicio
           li: a(href="/perfil") Mi perfil
           li: a(href="/albums") Mis álbumes
+        ul.nav-right
           li: a(href="/logout") Cerrar sesión
 
     main
       block content
 
     footer
-      p © 2025 SocialArt. Todos los derechos reservados.
+      p © 2025 SocialArt. Adan Coronel .

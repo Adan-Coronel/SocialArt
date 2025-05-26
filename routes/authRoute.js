@@ -10,4 +10,9 @@ router.post('/registro', registrarUsuario);
 
 router.post('/login', loginUsuario);
 
+router.get('/logout',(req,res)=>{
+  res.clearCookie('token');
+  res.redirect('/')
+})
+
 module.exports = router;
