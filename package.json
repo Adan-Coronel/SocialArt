@@ -1,4 +1,17 @@
 {
+  
+  "name": "socialart",
+  "version": "1.0.0",
+  "description": "Red social para artistas y artesanos",
+  "main": "server/index.js",
+  "scripts": {
+    "build:views": "pug views/ --out public",
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^1.41.3",
@@ -13,17 +26,7 @@
     "pug": "^3.0.3",
     "sequelize": "^6.37.7"
   },
-  "name": "final",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "build:views": "pug views/ --out public",
-    "start": "nodemon server/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "node ./node_modules/tailwindcss/lib/cli.js -i public/styles.css -o public/output.css --watch"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

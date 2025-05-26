@@ -4,10 +4,10 @@ require('dotenv').config()
 
 const verificarToken = async (req, res, next) => {
   const token = req.cookies.token;
-  //console.log('Middleware verificarToken ejecutado');
+  console.log('Middleware verificarToken ejecutado');
 
   if (!token) {
-    //console.log('⛔ No hay token');
+    console.log(' No hay token');
     return res.redirect('/');
   }
 
