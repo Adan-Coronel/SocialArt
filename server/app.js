@@ -1,6 +1,6 @@
 const express = require('express');
 
-const path = require(`path`)
+const path = require('path')
 const app = express()
 const PORT = 3000
 const cookieParser = require('cookie-parser');
@@ -50,7 +50,5 @@ app.use((err, req, res, next) => {
   res.status(500).send(err.message || 'Error interno del servidor');
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor listo en http://localhost:${PORT}`)
-})
 
+module.exports =app;
