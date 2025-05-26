@@ -13,6 +13,9 @@ const authRoutes = require('../routes/authRoute');
 const imageRoutes = require('../routes/imageRoute');
 const albumRoutes = require('../routes/albumRoute');
 const perfilRoutes = require('../routes/perfilRoute');
+const muroRoutes = require("../routes/muroRoute");
+const busquedaRoutes = require('../routes/busquedaRoute');
+
 //Vistas
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '../views_pug'))
@@ -20,11 +23,11 @@ app.set('views', path.join(__dirname, '../views_pug'))
 
 
 app.use('/', authRoutes);
-app.use('/albums', imageRoutes)
-app.use('/albums', albumRoutes)
+app.use('/albums', imageRoutes);
+app.use('/albums', albumRoutes);
 app.use('/perfil', perfilRoutes);
-
-
+app.use("/muro", muroRoutes) ;
+app.use('/busqueda', busquedaRoutes);
 
 
 //Error global pruebas de cloudinary

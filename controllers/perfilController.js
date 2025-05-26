@@ -1,7 +1,7 @@
 const { User, Album } = require('../models/indexModel');
 
 const verPerfil = async (req, res) => {
-  console.log('👉 req.user:', req.user);
+  console.log('req.user:', req.user);
   if (!req.user) return res.redirect('/');
 
   const usuario = await User.findByPk(req.user.idUser, {
@@ -10,7 +10,7 @@ const verPerfil = async (req, res) => {
 
   if (!usuario) return res.redirect('/');
 
-  res.render('perfil', { user: usuario });
+  res.render('perfil', { usuarioLogueado: req.user,user: usuario });
 };
 const actualizarPerfil = async (req, res) => {
   try {
@@ -29,7 +29,7 @@ const actualizarPerfil = async (req, res) => {
 
     res.redirect('/perfil');
   } catch (err) {
-    console.error('⚠️ Error al actualizar perfil:', err);
+    console.error('Error al actualizar perfil:', err);
     res.status(500).send('Error al actualizar perfil');
   }
 };

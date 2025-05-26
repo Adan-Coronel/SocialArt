@@ -64,7 +64,7 @@ const loginUsuario = async (req, res) => {
 
         const token = jwt.sign({ id: user.idUser }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.cookie('token', token, { httpOnly: true });
-        res.redirect('/perfil');
+        res.redirect('/muro');
     } catch (err) {
         console.error('Ves este error desde authController.js desppues borrar.', err);
         res.status(500).send('Error interno');

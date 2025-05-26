@@ -10,10 +10,15 @@ html(lang="es")
     header
       nav.navbar
         ul.nav-left
-          li: a(href="/") Inicio
+          li: a(href="/muro") Inicio
           li: a(href="/perfil") Mi perfil
           li: a(href="/albums") Mis álbumes
         ul.nav-right
+          if typeof usuarioLogueado !== 'undefined'
+            li
+              form(action="/busqueda", method="GET", style="display:inline;")
+                input(type="text", name="q", placeholder="Buscar por nombre/email")
+                button(type="submit") Buscar
           li: a(href="/logout") Cerrar sesión
 
     main

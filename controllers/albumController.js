@@ -1,5 +1,20 @@
 const { Album, Image } = require('../models/indexModel');
 
+const verAlbumes = async(req, res)=>{
+
+  const albums = await Album.findAll({
+    where: { user_id: req.user.idUser },
+    include: [{
+      model: Image,
+      limit: 1,
+      order: [['created_at', 'DESC']]
+    }],
+    order: [['created_at', 'DESC']]
+  });
+
+  res.render('mis_albums', { usuarioLogueado: req.user, albums });
+
+}
 const verAlbum = async (req, res) => {
   try {
 
@@ -17,7 +32,7 @@ const verAlbum = async (req, res) => {
     }
     const imagenes = await Image.findAll({ where: { album_id: album.idAlbum } })
 
-    res.render('album', { album, imagenes });
+    res.render('album', { usuarioLogueado: req.user, album, imagenes });
   } catch (err) {
     console.error('Ves este error desde albumController.js desppues borrar. Error al cargar el álbum:', err);
     res.status(500).send('Error interno al cargar el álbum');
@@ -59,4 +74,4 @@ const eliminarAlbum = async (req, res) => {
 };
 
 
-module.exports = { verAlbum, crearAlbum, eliminarAlbum };
+module.exports = { verAlbum, verAlbumes, crearAlbum, eliminarAlbum };

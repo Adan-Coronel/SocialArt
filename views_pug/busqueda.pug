@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1 Resultados de búsqueda
+
+  if resultados.length
+    each usuario in resultados
+      .resultado
+        if usuario.foto
+          img(src=usuario.foto, width="50")
+        else
+          span Sin foto
+        strong= usuario.nombre
+        if usuarioLogueado
+          a(href=`/muro/${usuario.idUser}`) Ver perfil
+        else
+          p (Debes iniciar sesión para enviar solicitud de amistad)
+  else
+    p No se encontraron resultados

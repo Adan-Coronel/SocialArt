@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1 Mis Álbumes
+
+  if albums.length
+    .albums-grid
+      each album in albums
+        .album-card
+          h2= album.titulo
+          if album.Images.length
+            img(src=album.Images[0].url, width="300")
+          else
+            p (Sin imágenes)
+          a(href=`/albums/${album.idAlbum}`) Ver álbum
+  else
+    p Aún no tenés álbumes
+
+  style.
+    .albums-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .album-card {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }

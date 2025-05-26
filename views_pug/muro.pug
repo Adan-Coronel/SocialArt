@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  h1 Muro de Publicaciones
+
+  if usuarioLogueado
+    p Bienvenido/a, #{usuarioLogueado.nombre}
+  else
+    p Estás navegando como invitado
+
+  if albumes.length
+    .albumes-grid
+      each album in albumes
+        .album-card
+          h2
+            a(href=`/albums/${album.idAlbum}`)= album.titulo
+          if album.propietario
+            .autor
+                if album.propietario.foto
+                    img(src=album.propietario.foto, width="40", style="border-radius: 50%")
+                p Creado por: #{album.propietario.nombre}
+          if album.Images.length
+            img(src=album.Images[0].url, alt="Portada", width="300")
+          else
+            p (Sin imágenes)
+          p Fecha: #{new Date(album.created_at).toLocaleDateString()}
+          if album.is_public
+            span Público
+          else
+            span Privado (compartido)
+  else
+    p No hay álbumes para mostrar
