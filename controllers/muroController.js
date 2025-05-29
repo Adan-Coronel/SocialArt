@@ -1,19 +1,18 @@
 const { Album, Image, User, FriendRequest } = require("../models/indexModel");
 const { Op } = require("sequelize");
 
+const { obtenerEstadoRelacion } = require('./friendReqController');
+
 async function verMuro(req, res) {
   try {
     let albumesPublicos = [];
     let albumesAmigos = [];
     let usuarioLogueado = req.user;
 
-    // Álbumes públicos (modo vitrina)
-
     let filtroVitrina = {
       is_public: true
     };
 
-    // NO se incluyen sus propios álbumes
     if (usuarioLogueado) {
       filtroVitrina.user_id = { [Op.ne]: usuarioLogueado.idUser };
     }
@@ -37,8 +36,6 @@ async function verMuro(req, res) {
 
     albumesPublicos = albumesVitrina;
 
-
-    // Álbumes privados de amigos
     if (usuarioLogueado) {
       let solicitudesAceptadas = await FriendRequest.findAll({
         where: {
@@ -47,7 +44,6 @@ async function verMuro(req, res) {
         }
       });
 
-      //  solo los IDde los amigos
       let idsAmigos = [];
 
       for (let i = 0; i < solicitudesAceptadas.length; i++) {

@@ -1,4 +1,4 @@
-const { Album, Image } = require('../models/indexModel');
+const { Album, Image, User } = require('../models/indexModel');
 
 const verAlbumes = async(req, res)=>{
 
@@ -18,7 +18,17 @@ const verAlbumes = async(req, res)=>{
 const verAlbum = async (req, res) => {
   try {
 
-    const album = await Album.findByPk(req.params.id);
+    const album = await Album.findByPk(req.params.id,
+      {
+      include: [
+        {
+          model: User,
+          as: "propietario",
+          attributes: ["idUser", "nombre", "foto"],
+        },
+      ],
+    }
+    );
 
     if (!album) {
       return res.status(404).send('Álbum no encontrado');
@@ -32,7 +42,11 @@ const verAlbum = async (req, res) => {
     }
     const imagenes = await Image.findAll({ where: { album_id: album.idAlbum } })
 
-    res.render('album', { usuarioLogueado: req.user, album, imagenes });
+    res.render("album", {
+      album,
+      imagenes,
+      usuarioLogueado: req.user,
+    })
   } catch (err) {
     console.error('Ves este error desde albumController.js desppues borrar. Error al cargar el álbum:', err);
     res.status(500).send('Error interno al cargar el álbum');

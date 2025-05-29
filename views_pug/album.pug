@@ -1,24 +1,47 @@
 extends layout
 
 block content
-  h1 Álbum "#{album.titulo}"
-  h2 Subir nueva imagen
-  form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
-    label Imagen:
-    input(type="file", name="imagen", required)
+  link(rel="stylesheet", href="/album.css")
+  .album-container
+    .album-header
+      h1 Álbum "#{album.titulo}"
+      if album.propietario
+        .propietario-info
+          p Creado por: 
+            a.propietario-link(href=`/perfil/${album.propietario.idUser}`) #{album.propietario.nombre}
+          small Hace #{new Date(album.created_at).toLocaleDateString()}
+  
+    if usuarioLogueado && album.user_id === usuarioLogueado.idUser
+      .subir-imagen
+        h2 Subir nueva imagen
+        form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
+          label Imagen:
+          input(type="file", name="imagen", required)
+          label Descripción:
+          input(type="text", name="caption", placeholder="Texto opcional")
+          button(type="submit") Subir imagen
+    .imagenes-section
+      h2 Imágenes
+      if imagenes.length
+        each img in imagenes
+          .imagen-item
+            .imagen-container
+              img.imagen-principal(src=img.url, alt=img.caption || 'Imagen del álbum')
+              if img.caption
+                p.imagen-caption= img.caption
 
-    label Descripción:
-    input(type="text", name="caption", placeholder="Texto opcional")
+            .comentarios-section
+              .comentarios-header
+                h4 Comentarios
+                if usuarioLogueado
+                  .comentario-form
+                    textarea.comentario-input(placeholder="Escribe un comentario...", rows="2")
+                    button.btn-comentar(onclick=`enviarComentario(${img.idImage})`) Comentar
+                else
+                  p.login-para-comentar Inicia sesión para comentar
+              
+              .comentarios-lista(id=`comentarios-${img.idImage}`)
+      else
+        p No hay imágenes todavía en este álbum.
 
-    button(type="submit") Subir imagen
-
-  hr
-  h2 Imágenes
-  if imagenes.length
-    each img in imagenes
-      div
-        img(src=img.url, width="300")
-        if img.caption
-          p= img.caption
-  else
-    p No hay imágenes todavía en este álbum.
+  script(src="/album.js")

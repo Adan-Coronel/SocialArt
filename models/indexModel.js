@@ -25,9 +25,16 @@ User.hasMany(Comment, { foreignKey: 'user_id' });
 Comment.belongsTo(User, { foreignKey: 'user_id' });
 
 // Usuario → Notificaciones
-User.hasMany(Notification, { foreignKey: 'user_id' });
+/*User.hasMany(Notification, { foreignKey: 'user_id' });
 Notification.belongsTo(User, { foreignKey: 'user_id' });
+*/
+// Usuario → Notificaciones (receptor)
+User.hasMany(Notification, { foreignKey: 'user_id', as: 'notificacionesRecibidas' });
+Notification.belongsTo(User, { foreignKey: 'user_id', as: 'receptor' });
 
+// Usuario → Notificaciones (emisor)
+User.hasMany(Notification, { foreignKey: 'from_user_id', as: 'notificacionesEnviadas' });
+Notification.belongsTo(User, { foreignKey: 'from_user_id', as: 'emisor' });
 // Usuario → FriendRequests (dos roles)
 User.hasMany(FriendRequest, { foreignKey: 'from_user', as: 'enviadas' });
 User.hasMany(FriendRequest, { foreignKey: 'to_user', as: 'recibidas' });

@@ -4,6 +4,7 @@ const app = express()
 const cookieParser = require('cookie-parser');
 
 //middlewares
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser());
@@ -15,7 +16,9 @@ const albumRoutes = require('../routes/albumRoute');
 const perfilRoutes = require('../routes/perfilRoute');
 const muroRoutes = require("../routes/muroRoute");
 const busquedaRoutes = require('../routes/busquedaRoute');
-
+const friendRoutes = require("../routes/friendReqRoute");
+const commentRoutes = require("../routes/commentRoute")
+const notificationRoutes = require("../routes/notiRoute")
 //Vistas
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '../views_pug'))
@@ -28,7 +31,9 @@ app.use('/albums', albumRoutes);
 app.use('/perfil', perfilRoutes);
 app.use("/muro", muroRoutes) ;
 app.use('/busqueda', busquedaRoutes);
-
+app.use("/solicitudes", friendRoutes);
+app.use("/comentarios", commentRoutes);
+app.use("/notificaciones", notificationRoutes);
 
 //Error global pruebas de cloudinary
 app.use((err, req, res, next) => {

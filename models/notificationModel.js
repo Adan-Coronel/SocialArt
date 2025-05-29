@@ -7,13 +7,26 @@ const Notification = sequelize.define('Notification', {
     primaryKey: true,
     autoIncrement: true
   },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+
   tipo: {
-    type: DataTypes.ENUM('solicitud', 'comentario'),
+    type: DataTypes.ENUM("solicitud_amistad", "comentario", "solicitud_aceptada"),
+    allowNull: false
+  },
+  from_user_id: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   ref_id: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  mensaje: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   leido: {
     type: DataTypes.BOOLEAN,

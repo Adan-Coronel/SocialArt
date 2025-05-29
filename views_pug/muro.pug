@@ -1,32 +1,59 @@
 extends layout
 
 block content
-  h1 Muro de Publicaciones
+  link(rel="stylesheet", href="/muro.css")
+  .muro-container
+    .muro-header
+      h1 Muro de Publicaciones
 
-  if usuarioLogueado
-    p Bienvenido/a, #{usuarioLogueado.nombre}
-  else
-    p Estás navegando como invitado
+      if usuarioLogueado
+        p Bienvenido/a, #{usuarioLogueado.nombre}
+      else
+        p Estás navegando como invitado
 
-  if albumes.length
-    .albumes-grid
-      each album in albumes
-        .album-card
-          h2
-            a(href=`/albums/${album.idAlbum}`)= album.titulo
-          if album.propietario
-            .autor
-                if album.propietario.foto
-                    img(src=album.propietario.foto, width="40", style="border-radius: 50%")
-                p Creado por: #{album.propietario.nombre}
-          if album.Images.length
-            img(src=album.Images[0].url, alt="Portada", width="300")
-          else
-            p (Sin imágenes)
-          p Fecha: #{new Date(album.created_at).toLocaleDateString()}
-          if album.is_public
-            span Público
-          else
-            span Privado (compartido)
-  else
-    p No hay álbumes para mostrar
+    if albumes.length
+      .albumes-grid
+        each album in albumes
+          .album-card
+            .album-header
+              .usuario-info 
+                if album.propietario && album.propietario.foto
+                  img.avatar(src=album.propietario.foto, width="40")
+                else if album.propietario
+                  .avatar-placeholder #{album.propietario.nombre.charAt(0)}
+                .usuario-datos
+                  if album.propietario
+                    h3 #{album.propietario.nombre}
+                  small #{new Date(album.created_at).toLocaleDateString()}
+
+            .album-content
+              h2.album-titulo
+                a(href=`/albums/${album.idAlbum}`) #{album.titulo}
+              if album.is_public
+                span.badge-publico Público
+              else
+                span.badge-privado Solo amigos 
+              
+              if album.Images && album.Images.length
+                .imagen-portada
+                  img(src=album.Images[0].url, alt="Portada del álbum")
+                if album.Images.length > 1
+                  p.mas-imagenes #{album.Images.length - 1} imágenes más
+              else
+                .sin-imagenes
+                  p Este álbum aún no tiene imágenes
+                    
+            .album-actions
+                a.btn-ver(href=`/albums/${album.idAlbum}`) Ver álbum completo
+                if usuarioLogueado
+                  span.puede-comentar 💬 Puedes comentar
+                else
+                  span.no-puede-comentar 👁️ Solo visualización  
+    else
+      .sin-contenido
+        h2 No hay álbumes disponibles
+        p Aún no hay álbumes públicos para mostrar.
+        if !usuarioLogueado
+          p 
+            a(href="/") Inicia sesión 
+            | para ver más contenido de tus amigos.

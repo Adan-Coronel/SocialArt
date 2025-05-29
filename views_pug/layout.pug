@@ -6,6 +6,7 @@ html(lang="es")
     title SocialArt | Red social para artesanos
     link(rel="stylesheet", href="/login.css") 
     link(rel="stylesheet", href="/perfil.css")
+    link(rel='stylesheet', href='/notificaciones.css')
   body
     header
       nav.navbar
@@ -19,6 +20,11 @@ html(lang="es")
               form(action="/busqueda", method="GET", style="display:inline;")
                 input(type="text", name="q", placeholder="Buscar por nombre/email")
                 button(type="submit") Buscar
+            li
+              .notificaciones-container
+                button.notificaciones-btn(onclick="notificaciones.togglePanel()")
+                  | 🔔
+                  .notificaciones-badge #{notificacionesCount || 0}
           li: a(href="/logout") Cerrar sesión
 
     main

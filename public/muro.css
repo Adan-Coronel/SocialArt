@@ -1,14 +1,230 @@
+.muro-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.muro-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.muro-header h1 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+
+.muro-header p {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
 .albumes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  padding: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
 }
 
 .album-card {
-  border: 1px solid #ddd;
+  background: white;
   border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.album-header {
   padding: 1rem;
-  background: #fff;
-  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  border-bottom: 1px solid #eee;
+}
+
+.usuario-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4a90e2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.usuario-datos h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.usuario-datos small {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.album-content {
+  padding: 1rem;
+}
+
+.album-titulo {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.25rem;
+}
+
+.album-titulo a {
+  text-decoration: none;
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+.album-titulo a:hover {
+  color: #4a90e2;
+}
+
+.badge-publico,
+.badge-privado {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.badge-publico {
+  background: #e8f5e8;
+  color: #2d5a2d;
+}
+
+.badge-privado {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.imagen-portada {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.imagen-portada img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.mas-imagenes {
+  margin: 0.5rem 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.sin-imagenes {
+  background: #f8f9fa;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 8px;
+  color: #666;
+  margin: 1rem 0;
+}
+
+.album-actions {
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-ver {
+  background: #4a90e2;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-ver:hover {
+  background: #3a7bc8;
+}
+
+.puede-comentar {
+  color: #28a745;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.no-puede-comentar {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.sin-contenido {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sin-contenido h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.sin-contenido a {
+  color: #4a90e2;
+  text-decoration: none;
+}
+
+.sin-contenido a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 768px) {
+  .muro-container {
+    padding: 0.5rem;
+  }
+
+  .albumes-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .album-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .btn-ver {
+    text-align: center;
+  }
 }
