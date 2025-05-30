@@ -17,7 +17,7 @@ const obtenerEstadoRelacion = async (usuarioLogueado, otroUsuario) => {
 
   if (solicitudEnviada) {
     if (solicitudEnviada.status === "aceptada") {
-      return "amigos"
+      return "siguiendo"
     }
     if (solicitudEnviada.status === "pendiente") {
       return "solicitud_enviada"
@@ -76,15 +76,27 @@ const verPerfilPublico = async (req, res) => {
       return res.redirect("/perfil")
     }
 
-    let estadoRelacion = null
+    let estadosRelacion = { yoLoSigo: false, elMeSigue: false, solicitudRecibida: false, solicitudEnviada: false }
+
     if (usuarioLogueado) {
-      estadoRelacion = await obtenerEstadoRelacion(usuarioLogueado.idUser, userId)
+      estadosRelacion = await obtenerEstadosRelacion(usuarioLogueado.idUser, userId)
     }
 
+    const whereCondition = { user_id: userId }
+
+     if (!usuarioLogueado || !estadosRelacion.yoLoSigo) {
+       whereCondition.is_public = true
+     }
+    
+    const albums = await Album.findAll({
+      where: whereCondition,
+      order: [["created_at", "DESC"]],
+    });
+    usuario.dataValues.albums = albums;
     res.render("perfilPublico", {
       usuario,
       usuarioLogueado,
-      estadoRelacion,
+      estadosRelacion,
     })
   } catch (err) {
     console.error("Error al cargar perfil público:", err)
@@ -114,4 +126,50 @@ const actualizarPerfil = async (req, res) => {
     res.status(500).send('Error al actualizar perfil');
   }
 };
-module.exports={ verPerfil, verPerfilPublico, actualizarPerfil };
+
+const obtenerEstadosRelacion = async (usuarioLogueado, otroUsuario) => {
+  if (!usuarioLogueado || usuarioLogueado === otroUsuario) {
+    return { yoLoSigo: null, elMeSigue: null, solicitudRecibida: null }
+  }
+
+  const yoLoSigo = await FriendRequest.findOne({
+    where: {
+      from_user: usuarioLogueado,
+      to_user: otroUsuario,
+      status: "aceptada",
+    },
+  })
+
+  const elMeSigue = await FriendRequest.findOne({
+    where: {
+      from_user: otroUsuario,
+      to_user: usuarioLogueado,
+      status: "aceptada",
+    },
+  })
+
+  const solicitudRecibida = await FriendRequest.findOne({
+    where: {
+      from_user: otroUsuario,
+      to_user: usuarioLogueado,
+      status: "pendiente",
+    },
+  })
+
+  const solicitudEnviada = await FriendRequest.findOne({
+    where: {
+      from_user: usuarioLogueado,
+      to_user: otroUsuario,
+      status: "pendiente",
+    },
+  })
+
+  return {
+    yoLoSigo: !!yoLoSigo,
+    elMeSigue: !!elMeSigue,
+    solicitudRecibida: !!solicitudRecibida,
+    solicitudEnviada: !!solicitudEnviada,
+  }
+}
+
+module.exports={ verPerfil, verPerfilPublico, actualizarPerfil, obtenerEstadosRelacion };

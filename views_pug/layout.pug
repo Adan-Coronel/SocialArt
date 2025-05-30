@@ -24,7 +24,7 @@ html(lang="es")
               .notificaciones-container
                 button.notificaciones-btn(onclick="notificaciones.togglePanel()")
                   | 🔔
-                  .notificaciones-badge #{notificacionesCount || 0}
+                  .notificaciones-badge 0
           li: a(href="/logout") Cerrar sesión
 
     main
@@ -32,3 +32,5 @@ html(lang="es")
 
     footer
       p © 2025 SocialArt. Adan Coronel .
+    if typeof usuarioLogueado !== 'undefined'
+      script(src="/notificaciones.js")

@@ -1,12 +1,10 @@
 const { Album, Image, User, FriendRequest } = require("../models/indexModel");
 const { Op } = require("sequelize");
 
-const { obtenerEstadoRelacion } = require('./friendReqController');
-
 async function verMuro(req, res) {
   try {
     let albumesPublicos = [];
-    let albumesAmigos = [];
+    let albumesPrivadosDeSeguidos = []
     let usuarioLogueado = req.user;
 
     let filtroVitrina = {
@@ -37,23 +35,19 @@ async function verMuro(req, res) {
     albumesPublicos = albumesVitrina;
 
     if (usuarioLogueado) {
-      let solicitudesAceptadas = await FriendRequest.findAll({
+      const seguidos = await FriendRequest.findAll({
         where: {
           from_user: usuarioLogueado.idUser,
-          status: "aceptada"
+          status: "aceptada",
         }
       });
 
-      let idsAmigos = [];
+      let idsSeguidos = seguidos.map((solicitud) => solicitud.to_user)
 
-      for (let i = 0; i < solicitudesAceptadas.length; i++) {
-        idsAmigos.push(solicitudesAceptadas[i].to_user);
-      }
-
-      if (idsAmigos.length > 0) {
-        let albumesDeAmigos = await Album.findAll({
+      if (idsSeguidos.length > 0) {
+        let albumesDeUsuariosSeguidos = await Album.findAll({
           where: {
-            user_id: { [Op.in]: idsAmigos },
+            user_id: { [Op.in]: idsSeguidos },
             is_public: false
           },
           include: [
@@ -64,24 +58,22 @@ async function verMuro(req, res) {
             },
             {
               model: Image,
-              limit: 1,
+              limit: 3,
               order: [["created_at", "DESC"]]
             }
           ],
           order: [["created_at", "DESC"]]
         });
 
-        albumesAmigos = albumesDeAmigos;
+        albumesPrivadosDeSeguidos = albumesDeUsuariosSeguidos;
+
       }
     }
 
 
-    let todosLosAlbumes = albumesPublicos.concat(albumesAmigos);
-
-    //  (de más nuevo a más viejo)
-    todosLosAlbumes.sort(function(a, b) {
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
+    const todosLosAlbumes = [...albumesPublicos, ...albumesPrivadosDeSeguidos].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
+    )
 
     res.render("muro", {
       albumes: todosLosAlbumes,

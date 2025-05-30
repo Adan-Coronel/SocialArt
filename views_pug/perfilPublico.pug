@@ -15,27 +15,40 @@ block content
           if usuario.intereses
             p.intereses Intereses: #{usuario.intereses}
           
-          // Botones de acción según el estado de la relación
           if usuarioLogueado
-            .acciones-perfil
-              if estadoRelacion === 'sin_relacion'
-                button.btn-solicitud(onclick=`enviarSolicitud(${usuario.idUser})`) 
-                  | 📤 Enviar solicitud de amistad
-              else if estadoRelacion === 'solicitud_enviada'
-                button.btn-solicitud-enviada(onclick=`cancelarSolicitud(${usuario.idUser})`)
-                  | ⏳ Solicitud enviada (cancelar)
-              else if estadoRelacion === 'solicitud_recibida'
+            .estados-relacion
+              if estadosRelacion.yoLoSigo
+                .estado-seguimiento
+                  span.badge-siguiendo ✅ Lo sigues
+              
+              if estadosRelacion.elMeSigue
+                .estado-seguimiento
+                  span.badge-seguidor 👥 Te sigue
+              if estadosRelacion.solicitudRecibida
                 .solicitud-recibida
-                  p Este usuario te envió una solicitud de amistad
-                  button.btn-aceptar(onclick="irASolicitudes()") Ver solicitudes
-              else if estadoRelacion === 'amigos'
-                .ya-amigos
-                  span.badge-amigos ✅ Siguiendo
+                  .alerta-solicitud
+                    p.mensaje-solicitud 📩 #{usuario.nombre} te envió una solicitud de amistad
+                    .acciones-solicitud
+                      button.btn-aceptar(onclick="irASolicitudes()") Ver notificaciones
+              .acciones-perfil
+                if !estadosRelacion.yoLoSigo && !estadosRelacion.solicitudEnviada
+                  button.btn-solicitud(onclick=`enviarSolicitud(${usuario.idUser})`) 
+                    | 📤 Seguir
+                else if estadosRelacion.solicitudEnviada
+                  button.btn-solicitud-enviada(onclick=`cancelarSolicitud(${usuario.idUser})`)
+                    | ⏳ Solicitud enviada (cancelar)
+                else if estadosRelacion.yoLoSigo
+                  button.btn-dejar-seguir(onclick=`dejarDeSeguir(${usuario.idUser})`)
+                    | ❌ Dejar de seguir
           else
-            p.invitado-mensaje Inicia sesión para enviar solicitud de amistad
+            p.invitado-mensaje Inicia sesión para seguir a este usuario
 
     .perfil-content
-      h2 Álbumes públicos
+      h2 Álbumes
+      if estadosRelacion && estadosRelacion.yoLoSigo
+        p.info-seguidor Como sigues a este usuario, puedes ver todos sus álbumes
+      else
+        p.info-publicos Solo álbumes públicos
       if usuario.albums && usuario.albums.length
         .albumes-grid
           each album in usuario.albums
@@ -43,10 +56,16 @@ block content
               h3
                 a(href=`/albums/${album.idAlbum}`) #{album.titulo}
               p Creado: #{new Date(album.created_at).toLocaleDateString()}
-              span.badge-publico Público
+              if album.is_public
+                span.badge-publico Público
+              else
+                span.badge-privado Solo seguidores
       else
         .sin-albumes
-          p Este usuario no tiene álbumes públicos.
+          if estadosRelacion && estadosRelacion.yoLoSigo
+            p Este usuario no tiene álbumes.
+          else
+            p Este usuario no tiene álbumes públicos.
 
   
 
