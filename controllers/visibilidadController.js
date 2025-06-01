@@ -6,7 +6,6 @@ const configurarVisibilidadImagen = async (req, res) => {
     const userId = req.user.idUser
     const { usuariosPermitidos } = req.body
 
-    // Verificar que la imagen pertenece al usuario
     const imagen = await Image.findByPk(imageId, {
       include: [
         {
@@ -20,12 +19,9 @@ const configurarVisibilidadImagen = async (req, res) => {
       return res.status(404).json({ error: "Imagen no encontrada o no tienes permisos" })
     }
 
-    // Eliminar configuraciones anteriores
     await ImageVisibility.destroy({
       where: { image_id: imageId },
     })
-
-    // Crear nuevas configuraciones de visibilidad
     if (usuariosPermitidos && usuariosPermitidos.length > 0) {
       const configuraciones = usuariosPermitidos.map((usuarioId) => ({
         image_id: imageId,
@@ -79,7 +75,6 @@ const verConfiguracionVisibilidad = async (req, res) => {
     const albumId = req.params.albumId
     const userId = req.user.idUser
 
-    // Verificar que el álbum pertenece al usuario
     const album = await Album.findOne({
       where: {
         idAlbum: albumId,
@@ -91,6 +86,7 @@ const verConfiguracionVisibilidad = async (req, res) => {
           include: [
             {
               model: ImageVisibility,
+              as: "visibilidad",
               include: [
                 {
                   model: User,
