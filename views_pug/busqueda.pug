@@ -7,35 +7,93 @@ block content
       if query
         p Buscando: "#{query}"
 
-    if resultados.length
-      .resultados-grid
-        each usuario in resultados
-          .resultado-card
-            .usuario-info
-              if usuario.foto
-                img.usuario-avatar(src=usuario.foto, width="60")
-              else
-                .usuario-avatar-placeholder #{usuario.nombre.charAt(0)}
-              .usuario-datos
-                h3= usuario.nombre
-                p.usuario-email= usuario.email
-            
-            .usuario-acciones
-              if usuarioLogueado
-                a.btn-ver-perfil(href=`/perfil/${usuario.idUser}`) Ver perfil
-              else
-                p.login-requerido Inicia sesión para ver perfiles
+    .filtros-busqueda
+      form(action="/busqueda", method="GET")
+        input(type="hidden", name="q", value=query)
+        .filtros-grid
+          label
+            input(type="radio", name="tipo", value="todo", checked=tipo === 'todo')
+            | Todo
+          label
+            input(type="radio", name="tipo", value="usuarios", checked=tipo === 'usuarios')
+            | Usuarios
+          label
+            input(type="radio", name="tipo", value="albumes", checked=tipo === 'albumes')
+            | Álbumes
+        button(type="submit") Filtrar
+
+    if resultados.usuarios.length || resultados.albumes.length
+      if resultados.usuarios.length
+        .seccion-resultados
+          h2 👥 Usuarios (#{resultados.usuarios.length})
+          .resultados-grid
+            each usuario in resultados.usuarios
+              .resultado-card
+                .usuario-info
+                  if usuario.foto
+                    img.usuario-avatar(src=usuario.foto, width="60")
+                  else
+                    .usuario-avatar-placeholder #{usuario.nombre.charAt(0)}
+                  .usuario-datos
+                    h3= usuario.nombre
+                    p.usuario-email= usuario.email
+                
+                .usuario-acciones
+                  if usuarioLogueado
+                    a.btn-ver-perfil(href=`/perfil/${usuario.idUser}`) Ver perfil
+                  else
+                    p.login-requerido Inicia sesión para ver perfiles
+    if resultados.albumes.length
+        .seccion-resultados
+          h2 📁 Álbumes (#{resultados.albumes.length})
+          .albumes-grid
+            each album in resultados.albumes
+              .album-card
+                .album-header
+                  .usuario-info
+                    if album.propietario && album.propietario.foto
+                      img.avatar(src=album.propietario.foto, width="40")
+                    else if album.propietario
+                      .avatar-placeholder #{album.propietario.nombre.charAt(0)}
+                    .usuario-datos
+                      if album.propietario
+                        h4 #{album.propietario.nombre}
+                      small #{new Date(album.created_at).toLocaleDateString()}
+
+                .album-content
+                  h3.album-titulo
+                    a(href=`/albums/${album.idAlbum}`) #{album.titulo}
+                  
+                  if album.Tags && album.Tags.length
+                    .album-tags
+                      each tag in album.Tags
+                        span.tag-badge #{tag.nombreTag}
+                  
+                  if album.is_public
+                    span.badge-publico Público
+                  else
+                    span.badge-privado Solo seguidores
+                  
+                  if album.Images && album.Images.length
+                    .imagen-portada
+                      img(src=album.Images[0].url, alt="Portada del álbum")
+                  else
+                    .sin-imagenes-preview
+                      p Sin imágenes
+
+                .album-actions
+                  a.btn-ver(href=`/albums/${album.idAlbum}`) Ver álbum
     else
       .sin-resultados
         h2 No se encontraron resultados
         if query
-          p No hay usuarios que coincidan con "#{query}"
+          p No hay contenido que coincida con "#{query}"
         else
           p Ingresa un término de búsqueda
 
   style.
     .busqueda-container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 2rem;
     }
@@ -44,34 +102,75 @@ block content
       text-align: center;
       margin-bottom: 2rem;
     }
+    .filtros-busqueda {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
     
+    .filtros-grid {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .filtros-grid label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .seccion-resultados {
+      margin-bottom: 3rem;
+    }
+    
+    .seccion-resultados h2 {
+      color: #333;
+      border-bottom: 2px solid #4a90e2;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
     .resultados-grid {
       display: grid;
       gap: 1rem;
     }
-    
-    .resultado-card {
+    .albumes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    .resultado-card, .album-card {
       background: white;
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .resultado-card:hover, .album-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .resultado-card {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    
     .usuario-info {
       display: flex;
       align-items: center;
       gap: 1rem;
     }
     
-    .usuario-avatar {
+    .usuario-avatar, .avatar {
       border-radius: 50%;
       object-fit: cover;
     }
     
-    .usuario-avatar-placeholder {
+    .usuario-avatar-placeholder, .avatar-placeholder {
       width: 60px;
       height: 60px;
       border-radius: 50%;
@@ -83,8 +182,12 @@ block content
       font-weight: bold;
       font-size: 1.5rem;
     }
-    
-    .usuario-datos h3 {
+    .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+    }
+    .usuario-datos h3, .usuario-datos h4 {
       margin: 0 0 0.25rem 0;
       color: #333;
     }
@@ -94,17 +197,89 @@ block content
       color: #666;
       font-size: 0.9rem;
     }
+        .album-header {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
     
-    .btn-ver-perfil {
+    .album-titulo a {
+      text-decoration: none;
+      color: #333;
+      transition: color 0.2s ease;
+    }
+    
+    .album-titulo a:hover {
+      color: #4a90e2;
+    }
+    
+    .album-tags {
+      margin: 0.5rem 0;
+    }
+    
+    .tag-badge {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-right: 0.5rem;
+      display: inline-block;
+    }
+    
+    .badge-publico, .badge-privado {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin: 0.5rem 0;
+    }
+    
+    .badge-publico {
+      background: #e8f5e8;
+      color: #2d5a2d;
+    }
+    
+    .badge-privado {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .imagen-portada img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin: 0.5rem 0;
+    }
+    
+    .sin-imagenes-preview {
+      background: #f8f9fa;
+      padding: 1rem;
+      text-align: center;
+      border-radius: 6px;
+      color: #666;
+      margin: 0.5rem 0;
+    }
+    
+    .album-actions {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+    }
+    
+    .btn-ver-perfil, .btn-ver {
       background: #4a90e2;
       color: white;
       padding: 0.5rem 1rem;
       border-radius: 6px;
       text-decoration: none;
       transition: background-color 0.2s ease;
+      display: inline-block;
     }
     
-    .btn-ver-perfil:hover {
+    .btn-ver-perfil:hover, .btn-ver:hover {
       background: #3a7bc8;
     }
     

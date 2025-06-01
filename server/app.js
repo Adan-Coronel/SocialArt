@@ -17,8 +17,14 @@ const perfilRoutes = require('../routes/perfilRoute');
 const muroRoutes = require("../routes/muroRoute");
 const busquedaRoutes = require('../routes/busquedaRoute');
 const friendRoutes = require("../routes/friendReqRoute");
-const commentRoutes = require("../routes/commentRoute")
-const notificationRoutes = require("../routes/notiRoute")
+const commentRoutes = require("../routes/commentRoute");
+const notificationRoutes = require("../routes/notiRoute");
+const reactionRoutes = require("../routes/reactionRoute");
+const tagRoutes = require("../routes/tagRoute");
+const estadisticasRoutes = require("../routes/estadisticasRoute");
+const visibilidadRoutes = require("../routes/visibilidadRoute");
+
+
 //Vistas
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '../views_pug'))
@@ -34,6 +40,10 @@ app.use('/busqueda', busquedaRoutes);
 app.use("/solicitudes", friendRoutes);
 app.use("/comentarios", commentRoutes);
 app.use("/notificaciones", notificationRoutes);
+app.use("/reacciones", reactionRoutes);
+app.use("/tags", tagRoutes);
+app.use("/estadisticas", estadisticasRoutes);
+app.use("/visibilidad", visibilidadRoutes);
 
 //Error global pruebas de cloudinary
 app.use((err, req, res, next) => {
@@ -45,6 +55,5 @@ app.use((err, req, res, next) => {
   // cualquier otro error
   res.status(500).send(err.message || 'Error interno del servidor');
 });
-
 
 module.exports =app;

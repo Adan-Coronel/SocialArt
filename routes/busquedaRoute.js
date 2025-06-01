@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { buscarUsuarios } = require('../controllers/busquedaController');
+const { buscarContenido } = require('../controllers/busquedaController');
 const { verificarTokenOpcional } = require('../middlewares/auth');
 
-router.get('/', verificarTokenOpcional, buscarUsuarios);
+router.get('/', verificarTokenOpcional, buscarContenido);
 
 module.exports = router;

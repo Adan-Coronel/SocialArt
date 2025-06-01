@@ -2,10 +2,16 @@ extends layout
 
 block content
   link(rel="stylesheet", href="/album.css")
+  link(rel="stylesheet", href="/reacciones.css")
   body(data-usuario-logueado=usuarioLogueado ? usuarioLogueado.idUser : null)
   .album-container
     .album-header
       h1 Álbum "#{album.titulo}"
+      if album.Tags && album.Tags.length
+        .album-tags
+          p Tags: 
+          each tag in album.Tags
+            span.tag-badge #{tag.nombreTag}
       if album.propietario
         .propietario-info
           p Creado por: 
@@ -14,13 +20,13 @@ block content
   
     if usuarioLogueado && album.user_id === usuarioLogueado.idUser
       .subir-imagen
-        h2 Subir nueva imagen
+        h2 Subir nuevas imágenes
         form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
-          label Imagen:
-          input(type="file", name="imagen", required)
+          label Imágenes (máximo 20 por álbum):
+          input(type="file", name="imagenes", multiple, accept="image/*", required)
           label Descripción:
           input(type="text", name="caption", placeholder="Texto opcional")
-          button(type="submit") Subir imagen
+          button(type="submit") Subir imágenes
     .imagenes-section
       h2 Imágenes
       if imagenes.length
@@ -30,7 +36,13 @@ block content
               img.imagen-principal(src=img.url, alt=img.caption || 'Imagen del álbum')
               if img.caption
                 p.imagen-caption= img.caption
-
+            .reacciones-container
+              if usuarioLogueado
+                button.btn-reaccion(onclick=`toggleReaccion(${img.idImage})`)
+                  | ❤️
+                span.contador-reacciones
+              else
+                span.login-para-reaccionar Inicia sesión para reaccionar
             .comentarios-section
               .comentarios-header
                 h4 Comentarios
@@ -46,3 +58,4 @@ block content
         p No hay imágenes todavía en este álbum.
 
   script(src="/album.js")
+  script(src="/reacciones.js")

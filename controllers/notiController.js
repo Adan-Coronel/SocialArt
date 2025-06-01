@@ -1,5 +1,5 @@
-const { Notification, User, FriendRequest, Comment, Image } = require("../models/indexModel")
-const { crearAlbumCompartido } = require("./perfilController")
+const { Notification, User, FriendRequest } = require("../models/indexModel");
+
 const crearNotificacionSolicitud = async (fromUserId, toUserId, solicitudId) => {
   try {
     await Notification.create({
@@ -45,6 +45,23 @@ const crearNotificacionSolicitudAceptada = async (fromUserId, toUserId, solicitu
   }
 }
 
+
+const crearNotificacionReaccion = async (fromUserId, toUserId, imageId, imagenTitulo) => {
+  try {
+    await Notification.create({
+      user_id: toUserId,
+      tipo: "reaccion",
+      from_user_id: fromUserId,
+      ref_id: imageId,
+      mensaje: `le gustó ${imagenTitulo}`,
+    })
+  } catch (err) {
+    console.error("Error al crear notificación de reacción:", err)
+  }
+}
+
+
+
 const obtenerNotificacionesPendientes = async (req, res) => {
   try {
     const usuarioLogueado = req.user.idUser
@@ -62,7 +79,7 @@ const obtenerNotificacionesPendientes = async (req, res) => {
         },
       ],
       order: [["created_at", "DESC"]],
-      limit: 10, 
+      limit: 10,
     });
 
     const totalNotificaciones = await Notification.count({
@@ -157,30 +174,30 @@ const manejarAccionNotificacion = async (req, res) => {
       if (action === "aceptar") {
         const solicitud = await FriendRequest.findByPk(notificacion.ref_id)
         if (solicitud && solicitud.status === "pendiente") {
-          await solicitud.update({ status: "aceptada" })     
+          await solicitud.update({ status: "aceptada" })
 
           try {
-            const album1 = await crearAlbumCompartido(usuarioLogueado, notificacion.from_user_id)
-
-            const album2 = await crearAlbumCompartido(notificacion.from_user_id, usuarioLogueado)
-          
+            const { crearAlbumCompartido } = require("./perfilController")
+            await crearAlbumCompartido(usuarioLogueado, notificacion.from_user_id)
+            await crearAlbumCompartido(notificacion.from_user_id, usuarioLogueado)
           } catch (albumError) {
             console.error("Error al crear álbumes compartidos:", albumError)
           }
+
           await crearNotificacionSolicitudAceptada(
             usuarioLogueado,
             notificacion.from_user_id,
             solicitud.idFriendRequest,
           )
         }
-      } else if (action === "rechazar") {
+      }
+      else if (action === "rechazar") {
         const solicitud = await FriendRequest.findByPk(notificacion.ref_id)
         if (solicitud && solicitud.status === "pendiente") {
           await solicitud.update({ status: "rechazada" })
-        }
       }
     }
-
+  }
     res.json({ success: true, message: "Acción completada" })
   } catch (err) {
     console.error("Error al manejar acción:", err)
@@ -194,5 +211,5 @@ module.exports = {
   crearNotificacionSolicitudAceptada,
   obtenerNotificacionesPendientes,
   verTodasLasNotificaciones,
-  manejarAccionNotificacion,marcarComoLeida,
+  manejarAccionNotificacion, marcarComoLeida,
 }

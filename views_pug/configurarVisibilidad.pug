@@ -1,0 +1,113 @@
+extends layout
+
+block content
+  link(rel="stylesheet", href="/perfil.css")
+  .visibilidad-container
+    .visibilidad-header
+      h1 Configurar Visibilidad - #{album.titulo}
+      a.btn-volver(href=`/albums/${album.idAlbum}`) ← Volver al álbum
+
+    .instrucciones
+      p Selecciona qué usuarios pueden ver cada imagen de este álbum. Por defecto, todos tus seguidores pueden ver las imágenes.
+
+    if album.Images && album.Images.length
+      each imagen in album.Images
+        .imagen-config
+          .imagen-preview
+            img(src=imagen.url, width="200")
+            if imagen.caption
+              p.caption= imagen.caption
+          
+          .visibilidad-controls
+            h4 ¿Quién puede ver esta imagen?
+            .seguidores-list(id=`seguidores-${imagen.idImage}`)
+              p Cargando seguidores...
+            
+            button.btn-guardar(onclick=`guardarVisibilidad(${imagen.idImage})`) 
+              Guardar configuración
+    else
+      .sin-imagenes
+        p Este álbum no tiene imágenes aún.
+
+  script.
+    let seguidoresData = [];
+
+    async function cargarSeguidores() {
+      try {
+        const response = await fetch('/visibilidad/api/seguidores');
+        const data = await response.json();
+        
+        if (data.success) {
+          seguidoresData = data.seguidores;
+          mostrarSeguidoresEnTodasLasImagenes();
+        }
+      } catch (err) {
+        console.error('Error al cargar seguidores:', err);
+      }
+    }
+
+    function mostrarSeguidoresEnTodasLasImagenes() {
+      const containers = document.querySelectorAll('[id^="seguidores-"]');
+      
+      containers.forEach(container => {
+        const imageId = container.id.replace('seguidores-', '');
+        mostrarSeguidores(imageId, seguidoresData);
+      });
+    }
+
+    function mostrarSeguidores(imageId, seguidores) {
+      const container = document.getElementById(`seguidores-${imageId}`);
+      
+      if (seguidores.length === 0) {
+        container.innerHTML = '<p>No tienes seguidores aún.</p>';
+        return;
+      }
+
+      const html = seguidores.map(seguidor => `
+        <div class="seguidor-item">
+          ${seguidor.foto 
+            ? `<img class="seguidor-avatar" src="${seguidor.foto}" alt="${seguidor.nombre}">`
+            : `<div class="seguidor-avatar-placeholder">${seguidor.nombre.charAt(0)}</div>`
+          }
+          <div class="seguidor-info">
+            <div class="seguidor-nombre">${seguidor.nombre}</div>
+          </div>
+          <div class="checkbox-container">
+            <input type="checkbox" 
+                   id="seguidor-${imageId}-${seguidor.idUser}" 
+                   value="${seguidor.idUser}" 
+                   checked>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = html;
+    }
+
+    async function guardarVisibilidad(imageId) {
+      try {
+        const checkboxes = document.querySelectorAll(`#seguidores-${imageId} input[type="checkbox"]:checked`);
+        const usuariosPermitidos = Array.from(checkboxes).map(cb => cb.value);
+
+        const response = await fetch(`/visibilidad/imagen/${imageId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ usuariosPermitidos })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Configuración guardada correctamente');
+        } else {
+          alert('Error al guardar: ' + data.error);
+        }
+      } catch (err) {
+        console.error('Error al guardar visibilidad:', err);
+        alert('Error de conexión');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarSeguidores);

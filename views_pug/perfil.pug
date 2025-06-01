@@ -2,6 +2,7 @@ extends layout
 
 block content
   link(rel="stylesheet", href="/perfil.css")
+  link(rel="stylesheet", href="/estadisticas.css")
   h1 Bienvenida, #{user.nombre}
 
   if user.foto
@@ -16,14 +17,14 @@ block content
 
   if user.albums.length
     each album in user.albums
-      div
+      div.album-propio
         h3= album.titulo
         if album.is_public
           span (Público)
         else
           span (Privado)
         a(href=`/albums/${album.idAlbum}`) Ver
-        button(type="button", onclick=`configurarVisibilidad(${album.idAlbum})`) Configurar visibilidad
+        button(type="button", onclick=`window.location.href='/visibilidad/${album.idAlbum}'`) Configurar visibilidad
         button(type="button", onclick=`abrirModalEliminar(${album.idAlbum})`) Eliminar
   else
     p Todavía no tenés álbumes propios.
@@ -33,12 +34,12 @@ block content
     h2 Álbumes compartidos contigo
     p.info-compartidos Estos álbumes contienen imágenes que otros usuarios han decidido compartir contigo.
     
-    each album in albumesCompartidos
+    each shared in albumesCompartidos
       div.album-compartido
-        h3= album.titulo
+        h3= shared.Album.titulo
         span (Compartido)
-        a(href=`/albums/${album.idAlbum}`) Ver
-        small Compartido por: #{album.SharedAlbum.propietario.nombre}
+        a(href=`/albums/${shared.Album.idAlbum}`) Ver
+        small Compartido por: #{shared.propietario.nombre}
 
   .modal#modalAlbum
     .modal-fondo(onclick="cerrarModalAlbum()")
@@ -50,6 +51,9 @@ block content
 
         label Público:
         input(type="checkbox", name="is_public")
+
+        label Tags (opcional):
+        select#tagsSelect(name="tags", multiple, size="8")
 
         button(type="submit") Crear
         button(type="button", onclick="cerrarModalAlbum()") Cancelar
@@ -97,8 +101,31 @@ block content
       form(id="formEliminar", method="POST")
         button(type="submit") Confirmar
         button(type="button", onclick="cerrarModalEliminar()") Cancelar
+  script(src="/estadisticas.js")
   script.
+    async function cargarTags() {
+      try {
+        const response = await fetch('/tags/api/todas');
+        const data = await response.json();
+        
+        if (data.success) {
+          const select = document.getElementById('tagsSelect');
+          select.innerHTML = '';
+          
+          data.tags.forEach(tag => {
+            const option = document.createElement('option');
+            option.value = tag.idTag;
+            option.textContent = tag.nombreTag;
+            select.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error('Error al cargar tags:', err);
+      }
+    }
+    
     function mostrarModalAlbum() {
+      cargarTags();
       document.getElementById('modalAlbum').style.display = 'flex';
     }
     function cerrarModalAlbum() {
@@ -110,15 +137,11 @@ block content
     function cerrarModalEditar() {
       document.getElementById('modalEditar').style.display = 'none';
     }
-        function mostrarModalContrasena() {
+    function mostrarModalContrasena() {
       document.getElementById('modalContrasena').style.display = 'flex';
     }
     function cerrarModalContrasena() {
       document.getElementById('modalContrasena').style.display = 'none';
-    }
-    
-    function configurarVisibilidad(albumId) {
-      window.location.href = `/albums/${albumId}/visibilidad`;
     }
     function abrirModalEliminar(id) {
       document.getElementById('modalEliminar').style.display = 'flex';

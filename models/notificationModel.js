@@ -13,7 +13,7 @@ const Notification = sequelize.define('Notification', {
   },
 
   tipo: {
-    type: DataTypes.ENUM("solicitud_amistad", "comentario", "solicitud_aceptada"),
+    type: DataTypes.ENUM("solicitud_amistad", "comentario", "solicitud_aceptada", "reaccion"),
     allowNull: false
   },
   from_user_id: {

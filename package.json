@@ -1,32 +1,79 @@
 {
   
   "name": "socialart",
+  
   "version": "1.0.0",
+  
   "description": "Red social para artistas y artesanos",
+  
   "main": "server/index.js",
+  
   "scripts": {
-    "build:views": "pug views/ --out public",
-    "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+  
+    
+  "build:views": "pug views/ --out public",
+  
+    
+  "start": "node server/index.js",
+  
+    
+  "dev": "nodemon server/index.js"
+  
   },
+  
   "keywords": [],
+  
   "author": "",
+  
   "license": "ISC",
+  
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cloudinary": "^1.41.3",
-    "cookie-parser": "^1.4.7",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.0",
-    "multer-storage-cloudinary": "^4.0.0",
-    "mysql2": "^3.14.1",
-    "nodemon": "^3.1.10",
-    "pug": "^3.0.3",
-    "sequelize": "^6.37.7"
+  
+    
+  "bcrypt": "^6.0.0",
+  
+    
+  "cloudinary": "^1.41.3",
+  
+    
+  "cookie-parser": "^1.4.7",
+  
+    
+  "dotenv": "^16.5.0",
+  
+    
+  "express": "^5.1.0",
+  
+    
+  "jsonwebtoken": "^9.0.2",
+  
+    
+  "multer": "^2.0.0",
+  
+    
+  "multer-storage-cloudinary": "^4.0.0",
+  
+    
+  "mysql2": "^3.14.1",
+  
+    
+  "nodemon": "^3.1.10",
+  
+    
+  "pug": "^3.0.3",
+  
+    
+  "sequelize": "^6.37.7",
+  
+    
+  "socket.io": "^4.8.1"
+  
   },
+  
   "engines": {
-    "node": ">=18.0.0"
+  
+    
+  "node": ">=18.0.0"
+  
   }
 }

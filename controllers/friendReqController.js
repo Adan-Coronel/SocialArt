@@ -1,6 +1,94 @@
-const { User, FriendRequest } = require("../models/indexModel")
+const { FriendRequest } = require("../models/indexModel")
 const { crearNotificacionSolicitud, crearNotificacionSolicitudAceptada } = require("./notiController")
-const { crearAlbumCompartido } = require("./perfilController");
+const { enviarNotificacionEnTiempoReal } = require("./notificacionesRealTime")
+
+const crearAlbumCompartido = async (ownerId, viewerId) => {
+  try {
+    const { SharedAlbum, Album, User } = require("../models/indexModel")
+
+    const albumExistente = await SharedAlbum.findOne({
+      where: {
+        owner_id: ownerId,
+        viewer_id: viewerId,
+      },
+    })
+
+    if (albumExistente) {
+      return null
+    }
+
+    const propietario = await User.findByPk(ownerId, {
+      attributes: ["nombre"],
+    })
+    if (!propietario) {
+      console.error("❌ Propietario no encontrado")
+      return null
+    }
+
+    const nuevoAlbum = await Album.create({
+      user_id: viewerId,
+      titulo: `📤 ${propietario.nombre}`,
+      is_public: false,
+      created_at: new Date(),
+    })
+
+    const sharedAlbum = await SharedAlbum.create({
+      owner_id: ownerId,
+      viewer_id: viewerId,
+      album_id: nuevoAlbum.idAlbum,
+    })
+
+    return nuevoAlbum
+  } catch (err) {
+    console.error("Error al crear álbum compartido:", err)
+    return null
+  }
+}
+const procesarAceptacionSolicitud = async (solicitudId, usuarioQueAcepta) => {
+  const solicitud = await FriendRequest.findOne({
+    where: {
+      idFriendRequest: solicitudId,
+      to_user: usuarioQueAcepta,
+      status: "pendiente",
+    },
+  })
+
+  if (!solicitud) {
+    throw new Error("Solicitud no encontrada")
+  }
+
+  await solicitud.update({ status: "aceptada" })
+
+  try {
+    await crearAlbumCompartido(usuarioQueAcepta, solicitud.from_user)
+    await crearAlbumCompartido(solicitud.from_user, usuarioQueAcepta)
+  } catch (albumError) {
+    console.error("Error al crear álbumes compartidos:", albumError)
+  }
+
+  await crearNotificacionSolicitudAceptada(usuarioQueAcepta, solicitud.from_user, solicitudId)
+
+  return solicitud
+}
+
+const procesarRechazoSolicitud = async (solicitudId, usuarioQueRechaza) => {
+  const solicitud = await FriendRequest.findOne({
+    where: {
+      idFriendRequest: solicitudId,
+      to_user: usuarioQueRechaza,
+      status: "pendiente",
+    },
+  })
+
+  if (!solicitud) {
+    throw new Error("Solicitud no encontrada")
+  }
+
+  await solicitud.update({ status: "rechazada" })
+  return solicitud
+}
+
+
 const enviarSolicitud = async (req, res) => {
   try {
     const fromUser = req.user.idUser
@@ -43,6 +131,16 @@ const enviarSolicitud = async (req, res) => {
  
     await crearNotificacionSolicitud(fromUser, toUser, nuevaSolicitud.idFriendRequest)
 
+    const notificacion = {
+      tipo: "solicitud_amistad",
+      mensaje: `${req.user.nombre} te envió una solicitud de amistad`,
+      from_user: {
+        idUser: req.user.idUser,
+        nombre: req.user.nombre,
+        foto: req.user.foto,
+      },
+    }
+    enviarNotificacionEnTiempoReal(toUser, notificacion)
     res.json({
       success: true,
       message: "Solicitud enviada correctamente",
@@ -70,7 +168,13 @@ const aceptarSolicitud = async (req, res) => {
       return res.status(404).json({ error: "Solicitud no encontrada" })
     }
 
-    await solicitud.update({ status: "aceptada" })
+    await solicitud.update({ status: "aceptada" });
+    try {
+      await crearAlbumCompartido(usuarioLogueado, solicitud.from_user)
+      await crearAlbumCompartido(solicitud.from_user, usuarioLogueado)
+    } catch (albumError) {
+      console.error("Error al crear álbumes compartidos:", albumError)
+    }
 
     await crearNotificacionSolicitudAceptada(usuarioLogueado, solicitud.from_user, solicitudId)
 
@@ -135,7 +239,7 @@ const cancelarSolicitud = async (req, res) => {
     res.json({
       success: true,
       message: "Solicitud cancelada",
-      newStatus: "Añadir amigo",
+      newStatus: "Seguir",
     })
   } catch (err) {
     console.error("Error al cancelar solicitud:", err)
@@ -245,4 +349,6 @@ module.exports = {
   dejarDeSeguir,
   cancelarSeguimiento,
   obtenerEstadoRelacion,
+  procesarAceptacionSolicitud,
+  procesarRechazoSolicitud
 }

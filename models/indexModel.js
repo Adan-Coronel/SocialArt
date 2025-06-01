@@ -8,6 +8,7 @@ const Tag = require('./tagModel');
 const ImageTag = require('./imageTagModel');
 const ImageVisibility = require("./imageVisibilityModel");
 const SharedAlbum = require("./sharedAlbumModel");
+const Reaction = require("./reactionModel")
 
 //Relationshops
 // Usuario → Álbumes
@@ -43,9 +44,6 @@ User.hasMany(FriendRequest, { foreignKey: 'to_user', as: 'recibidas' });
 FriendRequest.belongsTo(User, { foreignKey: 'from_user', as: 'emisor' });
 FriendRequest.belongsTo(User, { foreignKey: 'to_user', as: 'receptor' });
 
-// Imagen → Tag (muchos a muchos)
-Image.belongsToMany(Tag, { through: ImageTag, foreignKey: 'image_id', otherKey: 'tag_id' });
-Tag.belongsToMany(Image, { through: ImageTag, foreignKey: 'tag_id', otherKey: 'image_id' });
 
 Image.hasMany(ImageVisibility, { foreignKey: "image_id", as: "visibilidad" })
 ImageVisibility.belongsTo(Image, { foreignKey: "image_id" })
@@ -60,6 +58,19 @@ SharedAlbum.belongsTo(User, { foreignKey: "owner_id", as: "propietario" })
 SharedAlbum.belongsTo(User, { foreignKey: "viewer_id", as: "visualizador" })
 SharedAlbum.belongsTo(Album, { foreignKey: "album_id" })
 Album.hasMany(SharedAlbum, { foreignKey: "album_id" })
+
+
+Album.belongsToMany(Tag, { through: "album_tags", foreignKey: "album_id", otherKey: "tag_id" })
+Tag.belongsToMany(Album, { through: "album_tags", foreignKey: "tag_id", otherKey: "album_id" })
+
+
+User.hasMany(Reaction, { foreignKey: "user_id" })
+Reaction.belongsTo(User, { foreignKey: "user_id" })
+Image.hasMany(Reaction, { foreignKey: "image_id" })
+Reaction.belongsTo(Image, { foreignKey: "image_id" })
+
+
+
 module.exports = {
   User,
   Album,
@@ -70,5 +81,6 @@ module.exports = {
   Tag,
   ImageTag,
   ImageVisibility,
-  SharedAlbum
+  SharedAlbum,
+  Reaction
 };

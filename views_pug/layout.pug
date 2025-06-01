@@ -7,6 +7,8 @@ html(lang="es")
     link(rel="stylesheet", href="/login.css") 
     link(rel="stylesheet", href="/perfil.css")
     link(rel='stylesheet', href='/notificaciones.css')
+    link(rel='stylesheet', href='/notificacionEmrg.css')
+    script(src="/socket.io/socket.io.js")
   body
     header
       nav.navbar
@@ -18,7 +20,11 @@ html(lang="es")
           if typeof usuarioLogueado !== 'undefined'
             li
               form(action="/busqueda", method="GET", style="display:inline;")
-                input(type="text", name="q", placeholder="Buscar por nombre/email")
+                input(type="text", name="q", placeholder="Buscar por usuarios, álbumes")
+                select(name="tipo")
+                  option(value="todo") Todo
+                  option(value="usuarios") Usuarios
+                  option(value="albumes") Álbumes
                 button(type="submit") Buscar
             li
               .notificaciones-container
@@ -34,3 +40,4 @@ html(lang="es")
       p © 2025 SocialArt. Adan Coronel .
     if typeof usuarioLogueado !== 'undefined'
       script(src="/notificaciones.js")
+      script(src="/notificacionesRealTime.js")

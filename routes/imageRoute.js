@@ -10,13 +10,14 @@ const upload = multer({ storage });
 
 router.post('/:id/upload', 
   verificarToken,
-  (req, res, next) => {
-    upload.single('imagen')(req, res, err => {
-      if (err) return next(err);
-      next();
-    });
-  }, subirImagen
+  (req, res, next) => {upload.array("imagenes", 20)(req, res, (err) => {
+      if (err) return next(err)
+      next()
+    })
+  },
+  subirImagen,
 );
+
 router.post('/imagenes/:id/eliminar',
    verificarToken, 
    eliminarImagen

@@ -49,34 +49,31 @@ const verPerfil = async (req, res) => {
 
   if (!usuario) return res.redirect('/');
 
-  const albumesCompartidos = await Album.findAll({
+  const albumesCompartidos = await SharedAlbum.findAll({
+    where: { viewer_id: req.user.idUser },
     include: [
       {
-        model: SharedAlbum,
-        where: {
-          viewer_id: req.user.idUser,
-        },
-        include: [
-          {
-            model: User,
-            as: "propietario",
-            attributes: ["idUser", "nombre", "foto"],
-          },
-        ],
+        model: Album,
+        include: [{ model: User, as: "propietario", attributes: ["idUser","nombre", "foto"] }]
       },
+      {
+        model: User,
+        as: "propietario",
+        attributes: ["idUser","nombre", "foto"]
+      } 
     ],
     order: [["created_at", "DESC"]],
   })
 
-  res.render('perfil', { usuarioLogueado: req.user,user: usuario, albumesCompartidos });
+  res.render('perfil', { usuarioLogueado: req.user, user: usuario, albumesCompartidos });
 };
 
 const crearAlbumCompartido = async (ownerId, viewerId) => {
   try {
-   
-    const albumExistente =await SharedAlbum.findOne({
-      where:{
-          owner_id: ownerId,
+
+    const albumExistente = await SharedAlbum.findOne({
+      where: {
+        owner_id: ownerId,
         viewer_id: viewerId
       }
     })
@@ -97,10 +94,10 @@ const crearAlbumCompartido = async (ownerId, viewerId) => {
     const nuevoAlbum = await Album.create({
       user_id: viewerId,
       titulo: `📤 ${propietario.nombre}`,
-      is_public: false, 
+      is_public: false,
       created_at: new Date(),
     })
-  
+
     const sharedAlbum = await SharedAlbum.create({
       owner_id: ownerId,
       viewer_id: viewerId,
@@ -139,10 +136,10 @@ const verPerfilPublico = async (req, res) => {
     const whereCondition = { user_id: userId }
     if (!usuarioLogueado) {
       whereCondition.is_public = true
-     }else if (estadosRelacion.yoLoSigo) {
-      
+    } else if (estadosRelacion.yoLoSigo) {
+
     } else {
-        whereCondition.is_public = true
+      whereCondition.is_public = true
     }
 
     const albums = await Album.findAll({
@@ -173,7 +170,7 @@ const actualizarPerfil = async (req, res) => {
     };
 
     if (req.file && req.file.path) {
-      datos.foto = req.file.path; 
+      datos.foto = req.file.path;
     }
 
     await User.update(datos, {
@@ -189,7 +186,7 @@ const actualizarPerfil = async (req, res) => {
 
 const obtenerEstadosRelacion = async (usuarioLogueado, otroUsuario) => {
   if (!usuarioLogueado || usuarioLogueado === otroUsuario) {
-    return { yoLoSigo: null, elMeSigue: null, solicitudRecibida: null, solicitudEnviada: null  }
+    return { yoLoSigo: null, elMeSigue: null, solicitudRecibida: null, solicitudEnviada: null }
   }
 
   const yoLoSigo = await FriendRequest.findOne({
@@ -264,4 +261,4 @@ const cambiarContrasena = async (req, res) => {
   }
 }
 
-module.exports={ verPerfil, verPerfilPublico, actualizarPerfil, obtenerEstadoRelacion, obtenerEstadosRelacion, crearAlbumCompartido, cambiarContrasena };
+module.exports = { verPerfil, verPerfilPublico, actualizarPerfil, obtenerEstadoRelacion, obtenerEstadosRelacion, crearAlbumCompartido, cambiarContrasena };

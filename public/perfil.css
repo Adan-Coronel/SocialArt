@@ -232,3 +232,150 @@ footer p {
     padding: 1rem;
   }
 }
+
+/* configurarVisbilidad.pug*/
+.visibilidad-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .visibilidad-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #eee;
+    }
+    
+    .btn-volver {
+      background: #6c757d;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+    
+    .btn-volver:hover {
+      background: #5a6268;
+    }
+    
+    .instrucciones {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #2196f3;
+    }
+    
+    .imagen-config {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 2rem;
+    }
+    
+    .imagen-preview {
+      flex-shrink: 0;
+    }
+    
+    .imagen-preview img {
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    
+    .caption {
+      margin: 0.5rem 0 0 0;
+      font-style: italic;
+      color: #666;
+    }
+    
+    .visibilidad-controls {
+      flex: 1;
+    }
+    
+    .visibilidad-controls h4 {
+      margin: 0 0 1rem 0;
+      color: #333;
+    }
+    
+    .seguidor-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      transition: background-color 0.2s ease;
+    }
+    
+    .seguidor-item:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .seguidor-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .seguidor-avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #4a90e2;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .seguidor-info {
+      flex: 1;
+    }
+    
+    .seguidor-nombre {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .checkbox-container input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .btn-guardar {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    
+    .btn-guardar:hover {
+      background: #218838;
+    }
+    
+    .sin-imagenes {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }

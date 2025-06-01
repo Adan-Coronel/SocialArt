@@ -1,4 +1,4 @@
-const { Album, Image, User } = require('../models/indexModel');
+const { Album, Image, User, Reaction, Tag } = require('../models/indexModel');
 
 const verAlbumes = async(req, res)=>{
 
@@ -25,6 +25,10 @@ const verAlbum = async (req, res) => {
           model: User,
           as: "propietario",
           attributes: ["idUser", "nombre", "foto"],
+        },
+        {
+          model: Tag,
+          attributes: ["idTag", "nombreTag"],
         },
       ],
     }
@@ -54,11 +58,32 @@ const verAlbum = async (req, res) => {
         return res.status(403).send("No tenés permiso para ver este álbum")
       }
     }
-    const imagenes = await Image.findAll({ where: { album_id: album.idAlbum } })
+    
+    const imagenes = await Image.findAll({
+      where: { album_id: album.idAlbum },
+      include: [
+        {
+          model: Reaction,
+          attributes: ["user_id"],
+        },
+      ],
+    })
 
+    const imagenesConReacciones = imagenes.map((imagen) => {
+      const totalReacciones = imagen.Reactions ? imagen.Reactions.length : 0
+      const usuarioReacciono = usuarioLogueado
+        ? imagen.Reactions?.some((r) => r.user_id === usuarioLogueado.idUser)
+        : false
+
+      return {
+        ...imagen.toJSON(),
+        totalReacciones,
+        usuarioReacciono,
+      }
+    });
     res.render("album", {
       album,
-      imagenes,
+      imagenes: imagenesConReacciones,
       usuarioLogueado: req.user,
     })
   } catch (err) {
@@ -71,11 +96,17 @@ const verAlbum = async (req, res) => {
 
 const crearAlbum = async (req, res) => {
   try {
-    await Album.create({
+    const album =await Album.create({
       user_id: req.user.idUser,
       titulo: req.body.titulo,
       is_public: !!req.body.is_public
     });
+    if (req.body.tags && req.body.tags.length > 0) {
+      const tags = await Tag.findAll({
+        where: { idTag: req.body.tags },
+      })
+      await album.addTags(tags)
+    }
     res.redirect('/perfil');
   } catch (err) {
     console.error('Error al crear álbum:', err);
