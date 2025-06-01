@@ -3,11 +3,7 @@ const { crearNotificacionComentario } = require("./notiController")
 
 const crearComentario = async (req, res) => {
   try {
-    console.log("🔍 DATOS DE LA SOLICITUD:")
-    console.log("- Headers:", req.headers)
-    console.log("- Body completo:", req.body)
-    console.log("- Query:", req.query)
-    console.log("- Params:", req.params)
+
     const imageId = Number.parseInt(req.params.imageId)
     const userId = req.user.idUser
 
@@ -16,57 +12,47 @@ const crearComentario = async (req, res) => {
 
     if (req.body && typeof req.body === "object") {
       texto = req.body.texto || req.body.comment || req.body.comentario
-    } else if (typeof req.body === "string") {
-      try {
-        // Intentar parsear si viene como string
-        const parsedBody = JSON.parse(req.body)
-        texto = parsedBody.texto || parsedBody.comment || parsedBody.comentario
-      } catch (e) {
-        texto = req.body // Usar el string completo como último recurso
-      }
     }
-
-    // Si aún no tenemos texto, intentar con query params
-    if (!texto && req.query) {
-      texto = req.query.texto || req.query.comment || req.query.comentario
-    }
-
-    console.log("📝 Texto extraído:", texto)
-
     if (!texto || texto.trim() === "") {
       return res.status(400).json({ error: "El comentario no puede estar vacío" })
     }
 
-    const imagen = await Image.findByPk(imageId)
-    if (!imagen) {
-      return res.status(404).json({ error: "Imagen no encontrada" })
-    }
-
-    // Buscar el álbum y propietario
-    const album = await Album.findByPk(imagen.album_id, {
+   const imagen = await Image.findByPk(imageId, {
       include: [
         {
-          model: User,
-          as: "propietario",
-          attributes: ["idUser", "nombre"],
+          model: Album,
+          include: [
+            {
+              model: User,
+              as: "propietario",
+              attributes: ["idUser", "nombre"],
+            },
+          ],
         },
       ],
     })
-
-
+    if (!imagen) {
+      return res.status(404).json({ error: "Imagen no encontrada" })
+    }
 
     const comentario = await Comment.create({
       image_id: imageId,
       user_id: userId,
       texto: texto.trim(),
     })
-    if (album && album.propietario) {
-      const propietarioId = album.propietario.idUser
+    if (imagen.Album && imagen.Album.propietario) {
+      const propietarioId = imagen.Album.propietario.idUser
       if (userId !== propietarioId) {
-        await crearNotificacionComentario(userId, propietarioId, comentario.idComment, imagen.caption || "tu imagen")
+        
+        await crearNotificacionComentario(
+          userId,
+          propietarioId,
+          comentario.idComment,
+          imagen.caption || "tu imagen",
+          texto.substring(0, 50) + (texto.length > 50 ? "..." : ""),
+        )
       }
     }
-
 
 
     const comentarioCompleto = await Comment.findByPk(comentario.idComment, {
@@ -140,9 +126,41 @@ const obtenerComentarios = async (req, res) => {
     res.status(500).json({ error: "Error interno al obtener comentarios" })
   }
 }
+const obtenerInfoComentario = async (req, res) => {
+  try {
+    const comentarioId = Number.parseInt(req.params.comentarioId)
 
+    const comentario = await Comment.findByPk(comentarioId, {
+      include: [
+        {
+          model: Image,
+          include: [
+            {
+              model: Album,
+              attributes: ["idAlbum"],
+            },
+          ],
+        },
+      ],
+    })
+
+    if (!comentario || !comentario.Image || !comentario.Image.Album) {
+      return res.status(404).json({ error: "Comentario no encontrado" })
+    }
+
+    res.json({
+      success: true,
+      albumId: comentario.Image.Album.idAlbum,
+      imageId: comentario.Image.idImage,
+    })
+  } catch (err) {
+    console.error("Error al obtener información del comentario:", err)
+    res.status(500).json({ error: "Error interno" })
+  }
+}
 module.exports = {
   crearComentario,
   eliminarComentario,
   obtenerComentarios,
+  obtenerInfoComentario
 }

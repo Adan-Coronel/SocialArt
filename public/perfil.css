@@ -49,6 +49,28 @@ div.album {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+.album-propio {
+  background: #f8f9fa;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  border-left: 4px solid #4a90e2;
+}
+
+.album-compartido {
+  background: #fff3cd;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.info-compartidos {
+  color: #856404;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
 .modal {
   position: fixed;
   display: none;

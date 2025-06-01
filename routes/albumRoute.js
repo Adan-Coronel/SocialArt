@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { verificarToken } = require('../middlewares/auth');
+const { verificarTokenOpcional } = require('../middlewares/auth');
 const { verAlbum, verAlbumes, crearAlbum, eliminarAlbum } = require('../controllers/albumController');
 
-router.get('/:id', verificarToken, verAlbum);
-router.get('/', verificarToken, verAlbumes)
-router.post('/', verificarToken, crearAlbum);
-router.post('/:id/eliminar', verificarToken, eliminarAlbum);
+router.get('/:id', verificarTokenOpcional, verAlbum);
+router.get('/', verificarTokenOpcional, verAlbumes)
+router.post('/', verificarTokenOpcional, crearAlbum);
+router.post('/:id/eliminar', verificarTokenOpcional, eliminarAlbum);
 module.exports = router;

@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Cargando página del álbum...");
+
+  const usuarioLogueado = document.body.getAttribute("data-usuario-logueado")
+  console.log("Usuario logueado:", usuarioLogueado)
+
   const imagenes = document.querySelectorAll(".imagen-item")
   console.log(`Encontradas ${imagenes.length} imágenes`)
   imagenes.forEach((item) => {
-    const imageId = getImageIdFromElement(item)
+    const imageId = item.getAttribute("data-image-id");
     console.log(`Procesando imagen ID: ${imageId}`)
-    if (imageId) {
-      cargarComentarios(imageId)
+    if (imageId) {cargarComentarios(imageId)
     }
   })
 })
@@ -16,7 +19,13 @@ function getImageIdFromElement(element) {
   console.log(`ID del elemento:`, imageId)
   return imageId
 }
-
+function mostrarMensajeInvitado(imageId) {
+  const container = document.getElementById(`comentarios-${imageId}`)
+  if (container) {
+    container.innerHTML =
+      '<p style="color: #666; font-style: italic;">Inicia sesión para ver y escribir comentarios.</p>'
+  }
+}
 async function enviarComentario(imageId) {
   console.log(`Enviando comentario para imagen ${imageId}`)
   const form = event.target.closest(".comentario-form")

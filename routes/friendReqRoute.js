@@ -6,6 +6,8 @@ const {
   aceptarSolicitud,
   rechazarSolicitud,
   cancelarSolicitud,
+  dejarDeSeguir,
+  cancelarSeguimiento
 } = require("../controllers/friendReqController")
 router.use(express.json())
 // enviar soli
@@ -16,6 +18,8 @@ router.post("/aceptar/:id", verificarToken, aceptarSolicitud)
 router.post("/rechazar/:id", verificarToken, rechazarSolicitud)
 // cancelar soli
 router.post("/cancelar/:idUser", verificarToken, cancelarSolicitud)
-
+//dejar de seguir unidireccional
+router.post("/dejar-seguir/:idUser", verificarToken, dejarDeSeguir)
+router.post("/cancelar-seguimiento/:idUser", verificarToken, cancelarSeguimiento)
 
 module.exports = router

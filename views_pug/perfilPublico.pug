@@ -40,6 +40,9 @@ block content
                 else if estadosRelacion.yoLoSigo
                   button.btn-dejar-seguir(onclick=`dejarDeSeguir(${usuario.idUser})`)
                     | ❌ Dejar de seguir
+                if estadosRelacion.elMeSigue
+                  button.btn-cancelar-seguimiento(onclick=`cancelarSeguimiento(${usuario.idUser})`)
+                    | 🚫 Cancelar que me siga
           else
             p.invitado-mensaje Inicia sesión para seguir a este usuario
 
@@ -49,7 +52,7 @@ block content
         p.info-seguidor Como sigues a este usuario, puedes ver todos sus álbumes
       else
         p.info-publicos Solo álbumes públicos
-      if usuario.albums && usuario.albums.length
+      if usuario.albums && usuario.albums.length > 0
         .albumes-grid
           each album in usuario.albums
             .album-card

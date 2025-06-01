@@ -38,8 +38,10 @@ const verAlbum = async (req, res) => {
     const esPropietario = album.user_id === req.user?.idUser;
     const esPublico = album.is_public;
 
-    let sigueAlPropietario = false
-    if (!esPropietario && usuarioLogueado) {
+    if (!esPropietario && !esPublico) {
+      if (!usuarioLogueado) {
+        return res.status(403).send("No tenés permiso para ver este álbum")
+      }
       const { FriendRequest } = require("../models/indexModel");
       const solicitudAceptada = await FriendRequest.findOne({
         where: {
@@ -47,10 +49,10 @@ const verAlbum = async (req, res) => {
           to_user: album.user_id,
           status: "aceptada"
         }});
-      sigueAlPropietario = !!solicitudAceptada
-    }
-    if (!esPropietario && !esPublico && !sigueAlPropietario) {
-      return res.status(403).send("No tenés permiso para ver este álbum")
+     
+    if (!solicitudAceptada) {
+        return res.status(403).send("No tenés permiso para ver este álbum")
+      }
     }
     const imagenes = await Image.findAll({ where: { album_id: album.idAlbum } })
 
@@ -66,9 +68,6 @@ const verAlbum = async (req, res) => {
 
 
 };
-
-
-//CRUD
 
 const crearAlbum = async (req, res) => {
   try {

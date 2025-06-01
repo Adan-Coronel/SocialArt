@@ -12,7 +12,6 @@ router.post('/:id/upload',
   verificarToken,
   (req, res, next) => {
     upload.single('imagen')(req, res, err => {
-      console.log('Multer callback error:', err);
       if (err) return next(err);
       next();
     });

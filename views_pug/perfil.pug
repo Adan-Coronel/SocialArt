@@ -1,15 +1,16 @@
 extends layout
 
 block content
+  link(rel="stylesheet", href="/perfil.css")
   h1 Bienvenida, #{user.nombre}
 
   if user.foto
     img(src=user.foto width="150")
 
-  p Intereses: #{user.intereses}
-
+  p Intereses: #{user.intereses || 'No especificados'}
+  p Antecedentes: #{user.antecedentes || 'No especificados'}
   button(onclick="mostrarModalEditar()") Editar perfil
-
+  button(onclick="mostrarModalContrasena()") Cambiar contraseña
   h2 Tus álbumes
   button(onclick="mostrarModalAlbum()") Crear nuevo álbum
 
@@ -19,10 +20,25 @@ block content
         h3= album.titulo
         if album.is_public
           span (Público)
+        else
+          span (Privado)
         a(href=`/albums/${album.idAlbum}`) Ver
+        button(type="button", onclick=`configurarVisibilidad(${album.idAlbum})`) Configurar visibilidad
         button(type="button", onclick=`abrirModalEliminar(${album.idAlbum})`) Eliminar
   else
-    p Todavía no tenés álbumes.
+    p Todavía no tenés álbumes propios.
+  
+  
+  if albumesCompartidos && albumesCompartidos.length
+    h2 Álbumes compartidos contigo
+    p.info-compartidos Estos álbumes contienen imágenes que otros usuarios han decidido compartir contigo.
+    
+    each album in albumesCompartidos
+      div.album-compartido
+        h3= album.titulo
+        span (Compartido)
+        a(href=`/albums/${album.idAlbum}`) Ver
+        small Compartido por: #{album.SharedAlbum.propietario.nombre}
 
   .modal#modalAlbum
     .modal-fondo(onclick="cerrarModalAlbum()")
@@ -48,12 +64,32 @@ block content
 
         label Intereses:
         input(type="text", name="intereses", value=user.intereses)
-
+        
+        label Antecedentes (estudios, logros, experiencia):
+        textarea(name="antecedentes", rows="4", placeholder="Describe tu formación, experiencia o logros como artista")= user.antecedentes
+        
         label Foto de perfil:
         input(type="file", name="foto")
 
         button(type="submit") Guardar
         button(type="button", onclick="cerrarModalEditar()") Cancelar
+
+  .modal#modalContrasena
+    .modal-fondo(onclick="cerrarModalContrasena()")
+    .modal-contenido
+      h2 Cambiar contraseña
+      form(action="/perfil/cambiar-contrasena", method="POST")
+        label Contraseña actual:
+        input(type="password", name="contrasenaActual", required)
+
+        label Nueva contraseña:
+        input(type="password", name="nuevaContrasena", required)
+
+        label Confirmar nueva contraseña:
+        input(type="password", name="confirmarContrasena", required)
+
+        button(type="submit") Cambiar contraseña
+        button(type="button", onclick="cerrarModalContrasena()") Cancelar
   .modal#modalEliminar
     .modal-fondo(onclick="cerrarModalEliminar()")
     .modal-contenido
@@ -73,6 +109,16 @@ block content
     }
     function cerrarModalEditar() {
       document.getElementById('modalEditar').style.display = 'none';
+    }
+        function mostrarModalContrasena() {
+      document.getElementById('modalContrasena').style.display = 'flex';
+    }
+    function cerrarModalContrasena() {
+      document.getElementById('modalContrasena').style.display = 'none';
+    }
+    
+    function configurarVisibilidad(albumId) {
+      window.location.href = `/albums/${albumId}/visibilidad`;
     }
     function abrirModalEliminar(id) {
       document.getElementById('modalEliminar').style.display = 'flex';

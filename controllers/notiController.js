@@ -1,5 +1,5 @@
 const { Notification, User, FriendRequest, Comment, Image } = require("../models/indexModel")
-
+const { crearAlbumCompartido } = require("./perfilController")
 const crearNotificacionSolicitud = async (fromUserId, toUserId, solicitudId) => {
   try {
     await Notification.create({
@@ -16,16 +16,15 @@ const crearNotificacionSolicitud = async (fromUserId, toUserId, solicitudId) => 
 }
 
 
-const crearNotificacionComentario = async (fromUserId, toUserId, comentarioId, imagenTitulo) => {
+const crearNotificacionComentario = async (fromUserId, toUserId, comentarioId, imagenTitulo, extractoComentario) => {
   try {
     await Notification.create({
       user_id: toUserId,
       tipo: "comentario",
       from_user_id: fromUserId,
       ref_id: comentarioId,
-      mensaje: `comentó en tu imagen "${imagenTitulo}"`,
+      mensaje: `comentó en ${imagenTitulo}: "${extractoComentario}"`,
     });
-
   } catch (err) {
     console.error("Error al crear notificación de comentario:", err)
   }
@@ -104,8 +103,6 @@ const verTodasLasNotificaciones = async (req, res) => {
 
     })
 
-    await Notification.update({ leido: true }, { where: { user_id: usuarioLogueado, leido: false } })
-
     res.render("notificaciones", {
       notificaciones,
       user: req.user,
@@ -116,7 +113,28 @@ const verTodasLasNotificaciones = async (req, res) => {
     res.status(500).send("Error interno al cargar notificaciones")
   }
 }
+const marcarComoLeida = async (req, res) => {
+  try {
+    const { notificationId } = req.params
+    const usuarioLogueado = req.user.idUser
+    const notificacion = await Notification.findOne({
+      where: {
+        idNotification: notificationId,
+        user_id: usuarioLogueado,
+      },
+    })
 
+    if (!notificacion) {
+      return res.status(404).json({ error: "Notificación no encontrada" })
+    }
+
+    await notificacion.update({ leido: true })
+    res.json({ success: true, message: "Notificación marcada como leída" })
+  } catch (err) {
+    console.error("Error al marcar notificación:", err)
+    res.status(500).json({ error: "Error interno" })
+  }
+}
 const manejarAccionNotificacion = async (req, res) => {
   try {
     const { notificationId, action } = req.params
@@ -139,7 +157,16 @@ const manejarAccionNotificacion = async (req, res) => {
       if (action === "aceptar") {
         const solicitud = await FriendRequest.findByPk(notificacion.ref_id)
         if (solicitud && solicitud.status === "pendiente") {
-          await solicitud.update({ status: "aceptada" })
+          await solicitud.update({ status: "aceptada" })     
+
+          try {
+            const album1 = await crearAlbumCompartido(usuarioLogueado, notificacion.from_user_id)
+
+            const album2 = await crearAlbumCompartido(notificacion.from_user_id, usuarioLogueado)
+          
+          } catch (albumError) {
+            console.error("Error al crear álbumes compartidos:", albumError)
+          }
           await crearNotificacionSolicitudAceptada(
             usuarioLogueado,
             notificacion.from_user_id,
@@ -167,5 +194,5 @@ module.exports = {
   crearNotificacionSolicitudAceptada,
   obtenerNotificacionesPendientes,
   verTodasLasNotificaciones,
-  manejarAccionNotificacion,
+  manejarAccionNotificacion,marcarComoLeida,
 }

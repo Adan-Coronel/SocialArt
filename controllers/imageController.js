@@ -1,9 +1,6 @@
 const { Image } = require('../models/indexModel');
 
 const subirImagen = async (req, res) => {
-  console.log('BODY:', req.body);
-  console.log('FILE:', req.file);
-  console.log('PARAMS:', req.params);
 
   try {
     if (!req.file || !req.file.path) {

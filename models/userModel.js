@@ -30,6 +30,10 @@ const User= sequelize.define('User', {
     },
     intereses: {
         type: DataTypes.TEXT
+    },
+    antecedentes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     }
 
 }, {

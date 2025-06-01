@@ -6,6 +6,8 @@ const FriendRequest = require('./friendRequestModel');
 const Notification = require('./notificationModel');
 const Tag = require('./tagModel');
 const ImageTag = require('./imageTagModel');
+const ImageVisibility = require("./imageVisibilityModel");
+const SharedAlbum = require("./sharedAlbumModel");
 
 //Relationshops
 // Usuario → Álbumes
@@ -45,6 +47,19 @@ FriendRequest.belongsTo(User, { foreignKey: 'to_user', as: 'receptor' });
 Image.belongsToMany(Tag, { through: ImageTag, foreignKey: 'image_id', otherKey: 'tag_id' });
 Tag.belongsToMany(Image, { through: ImageTag, foreignKey: 'tag_id', otherKey: 'image_id' });
 
+Image.hasMany(ImageVisibility, { foreignKey: "image_id", as: "visibilidad" })
+ImageVisibility.belongsTo(Image, { foreignKey: "image_id" })
+User.hasMany(ImageVisibility, { foreignKey: "user_id" })
+ImageVisibility.belongsTo(User, { foreignKey: "user_id" })
+
+
+User.hasMany(SharedAlbum, { foreignKey: "owner_id", as: "albumesCompartidos" })
+User.hasMany(SharedAlbum, { foreignKey: "viewer_id", as: "albumesRecibidos" })
+
+SharedAlbum.belongsTo(User, { foreignKey: "owner_id", as: "propietario" })
+SharedAlbum.belongsTo(User, { foreignKey: "viewer_id", as: "visualizador" })
+SharedAlbum.belongsTo(Album, { foreignKey: "album_id" })
+Album.hasMany(SharedAlbum, { foreignKey: "album_id" })
 module.exports = {
   User,
   Album,
@@ -53,5 +68,7 @@ module.exports = {
   FriendRequest,
   Notification,
   Tag,
-  ImageTag
+  ImageTag,
+  ImageVisibility,
+  SharedAlbum
 };

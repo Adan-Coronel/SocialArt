@@ -1,17 +1,47 @@
 const { User, FriendRequest } = require("../models/indexModel")
 const { crearNotificacionSolicitud, crearNotificacionSolicitudAceptada } = require("./notiController")
-
+const { crearAlbumCompartido } = require("./perfilController");
 const enviarSolicitud = async (req, res) => {
   try {
     const fromUser = req.user.idUser
     const toUser = Number.parseInt(req.params.idUser)
+    const solicitudExistente = await FriendRequest.findOne({
+      where: {
+        from_user: fromUser,
+        to_user: toUser,
+        status: "pendiente",
+      },
+    })
+    if (solicitudExistente) {
+      return res.status(400).json({
+        error: "Ya enviaste una solicitud a este usuario",
+        newStatus: "Solicitud enviada",
+      })
+    }
 
-    const solicitud = await FriendRequest.create({
+    const yaAmigos = await FriendRequest.findOne({
+      where: {
+        from_user: fromUser,
+        to_user: toUser,
+        status: "aceptada",
+      },
+    })
+
+    if (yaAmigos){
+      return res.status(400).json({
+        error: "Ya sigues a este usuario",
+        newStatus: "Siguiendo",
+      })
+    }
+
+
+    const nuevaSolicitud = await FriendRequest.create({
       from_user: fromUser,
       to_user: toUser,
       status: "pendiente",
     })
-    await crearNotificacionSolicitud(fromUser, toUser, solicitud.idFriendRequest)
+ 
+    await crearNotificacionSolicitud(fromUser, toUser, nuevaSolicitud.idFriendRequest)
 
     res.json({
       success: true,
@@ -28,7 +58,6 @@ const aceptarSolicitud = async (req, res) => {
   try {
     const usuarioLogueado = req.user.idUser
     const solicitudId = Number.parseInt(req.params.id)
-
     const solicitud = await FriendRequest.findOne({
       where: {
         idFriendRequest: solicitudId,
@@ -113,7 +142,62 @@ const cancelarSolicitud = async (req, res) => {
     res.status(500).json({ error: "Error interno al cancelar solicitud" })
   }
 }
+const dejarDeSeguir = async (req, res) => {
+  try {
+    const fromUser = req.user.idUser
+    const toUser = Number.parseInt(req.params.idUser)
+    const solicitud = await FriendRequest.findOne({
+      where: {
+        from_user: fromUser,
+        to_user: toUser,
+        status: "aceptada",
+      },
+    })
 
+    if (!solicitud) {
+      return res.status(404).json({ error: "No sigues a este usuario" })
+    }
+
+    await solicitud.destroy()
+    res.json({
+      success: true,
+      message: "Dejaste de seguir a este usuario",
+      newStatus: "Seguir",
+    })
+  } catch (err) {
+    console.error("Error al dejar de seguir:", err)
+    res.status(500).json({ error: "Error interno" })
+  }
+}
+
+
+const cancelarSeguimiento = async (req, res) => {
+  try {
+    const toUser = req.user.idUser
+    const fromUser = Number.parseInt(req.params.idUser)
+    const solicitud = await FriendRequest.findOne({
+      where: {
+        from_user: fromUser,
+        to_user: toUser,
+        status: "aceptada",
+      },
+    })
+
+    if (!solicitud) {
+      return res.status(404).json({ error: "Este usuario no te sigue" })
+    }
+
+    await solicitud.destroy()
+    res.json({
+      success: true,
+      message: "Cancelaste el seguimiento de este usuario",
+      newStatus: "No te sigue",
+    })
+  } catch (err) {
+    console.error("Error al cancelar seguimiento:", err)
+    res.status(500).json({ error: "Error interno" })
+  }
+}
 
 const obtenerEstadoRelacion = async (usuarioLogueado, otroUsuario) => {
   if (!usuarioLogueado || usuarioLogueado === otroUsuario) {
@@ -158,5 +242,7 @@ module.exports = {
   aceptarSolicitud,
   rechazarSolicitud,
   cancelarSolicitud,
+  dejarDeSeguir,
+  cancelarSeguimiento,
   obtenerEstadoRelacion,
 }

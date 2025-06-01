@@ -1,10 +1,10 @@
 const express = require("express")
 const router = express.Router()
-const { verificarToken } = require("../middlewares/auth")
-const { crearComentario, eliminarComentario, obtenerComentarios } = require("../controllers/commentController")
+const { verificarToken, verificarTokenOpcional } = require("../middlewares/auth")
+const { crearComentario, eliminarComentario, obtenerComentarios, obtenerInfoComentario } = require("../controllers/commentController")
 router.use(express.json())
 router.post("/imagen/:imageId", verificarToken, crearComentario)
 router.delete("/:id", verificarToken, eliminarComentario)
-router.get("/imagen/:imageId", obtenerComentarios)
-
+router.get("/imagen/:imageId", verificarTokenOpcional, obtenerComentarios)
+router.get("/info/:comentarioId", verificarTokenOpcional, obtenerInfoComentario)
 module.exports = router

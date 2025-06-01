@@ -1,5 +1,6 @@
-const { User, Album, FriendRequest } = require('../models/indexModel');
-
+const { User, Album, FriendRequest, SharedAlbum } = require('../models/indexModel');
+const { Op } = require("sequelize");
+const bcrypt = require("bcrypt")
 
 const obtenerEstadoRelacion = async (usuarioLogueado, otroUsuario) => {
   if (!usuarioLogueado || usuarioLogueado === otroUsuario) {
@@ -40,7 +41,6 @@ const obtenerEstadoRelacion = async (usuarioLogueado, otroUsuario) => {
   return "sin_relacion"
 }
 const verPerfil = async (req, res) => {
-  console.log('req.user:', req.user);
   if (!req.user) return res.redirect('/');
 
   const usuario = await User.findByPk(req.user.idUser, {
@@ -49,23 +49,77 @@ const verPerfil = async (req, res) => {
 
   if (!usuario) return res.redirect('/');
 
-  res.render('perfil', { usuarioLogueado: req.user,user: usuario });
+  const albumesCompartidos = await Album.findAll({
+    include: [
+      {
+        model: SharedAlbum,
+        where: {
+          viewer_id: req.user.idUser,
+        },
+        include: [
+          {
+            model: User,
+            as: "propietario",
+            attributes: ["idUser", "nombre", "foto"],
+          },
+        ],
+      },
+    ],
+    order: [["created_at", "DESC"]],
+  })
+
+  res.render('perfil', { usuarioLogueado: req.user,user: usuario, albumesCompartidos });
 };
+
+const crearAlbumCompartido = async (ownerId, viewerId) => {
+  try {
+   
+    const albumExistente =await SharedAlbum.findOne({
+      where:{
+          owner_id: ownerId,
+        viewer_id: viewerId
+      }
+    })
+
+    if (albumExistente) {
+      return null
+    }
+
+    const propietario = await User.findByPk(ownerId, {
+      attributes: ["nombre"],
+    })
+    if (!propietario) {
+      console.error("❌ Propietario no encontrado")
+      return null
+    }
+
+
+    const nuevoAlbum = await Album.create({
+      user_id: viewerId,
+      titulo: `📤 ${propietario.nombre}`,
+      is_public: false, 
+      created_at: new Date(),
+    })
+  
+    const sharedAlbum = await SharedAlbum.create({
+      owner_id: ownerId,
+      viewer_id: viewerId,
+      album_id: nuevoAlbum.idAlbum,
+    })
+
+    return nuevoAlbum
+  } catch (err) {
+    console.error("Error al crear álbum compartido:", err)
+    return null
+  }
+}
 
 const verPerfilPublico = async (req, res) => {
   try {
     const userId = Number.parseInt(req.params.userId)
     const usuarioLogueado = req.user
-
     const usuario = await User.findByPk(userId, {
-      include: [
-        {
-          model: Album,
-          as: "albums",
-          where: { is_public: true }, // Solo álbumes públicos
-          required: false,
-        },
-      ],
+      attributes: ["idUser", "nombre", "email", "foto", "intereses", "antecedentes", "created_at"],
     })
 
     if (!usuario) {
@@ -83,16 +137,21 @@ const verPerfilPublico = async (req, res) => {
     }
 
     const whereCondition = { user_id: userId }
+    if (!usuarioLogueado) {
+      whereCondition.is_public = true
+     }else if (estadosRelacion.yoLoSigo) {
+      
+    } else {
+        whereCondition.is_public = true
+    }
 
-     if (!usuarioLogueado || !estadosRelacion.yoLoSigo) {
-       whereCondition.is_public = true
-     }
-    
     const albums = await Album.findAll({
       where: whereCondition,
       order: [["created_at", "DESC"]],
-    });
-    usuario.dataValues.albums = albums;
+      raw: true,
+    })
+    usuario.albums = albums
+
     res.render("perfilPublico", {
       usuario,
       usuarioLogueado,
@@ -109,7 +168,8 @@ const actualizarPerfil = async (req, res) => {
   try {
     const datos = {
       nombre: req.body.nombre,
-      intereses: req.body.intereses
+      intereses: req.body.intereses,
+      antecedentes: req.body.antecedentes
     };
 
     if (req.file && req.file.path) {
@@ -129,7 +189,7 @@ const actualizarPerfil = async (req, res) => {
 
 const obtenerEstadosRelacion = async (usuarioLogueado, otroUsuario) => {
   if (!usuarioLogueado || usuarioLogueado === otroUsuario) {
-    return { yoLoSigo: null, elMeSigue: null, solicitudRecibida: null }
+    return { yoLoSigo: null, elMeSigue: null, solicitudRecibida: null, solicitudEnviada: null  }
   }
 
   const yoLoSigo = await FriendRequest.findOne({
@@ -172,4 +232,36 @@ const obtenerEstadosRelacion = async (usuarioLogueado, otroUsuario) => {
   }
 }
 
-module.exports={ verPerfil, verPerfilPublico, actualizarPerfil, obtenerEstadosRelacion };
+const cambiarContrasena = async (req, res) => {
+  try {
+    const { contrasenaActual, nuevaContrasena, confirmarContrasena } = req.body
+    const userId = req.user.idUser
+
+    if (nuevaContrasena !== confirmarContrasena) {
+      return res.status(400).send("Las nuevas contraseñas no coinciden")
+    }
+
+
+    const usuario = await User.findByPk(userId)
+    if (!usuario) {
+      return res.status(404).send("Usuario no encontrado")
+    }
+
+    const contrasenaValida = await bcrypt.compare(contrasenaActual, usuario.pwd_hash)
+    if (!contrasenaValida) {
+      return res.status(400).send("La contraseña actual es incorrecta")
+    }
+
+
+    const nuevaContrasenaHash = await bcrypt.hash(nuevaContrasena, 10)
+
+    await User.update({ pwd_hash: nuevaContrasenaHash }, { where: { idUser: userId } })
+
+    res.redirect("/perfil?mensaje=Contraseña cambiada exitosamente")
+  } catch (err) {
+    console.error("Error al cambiar contraseña:", err)
+    res.status(500).send("Error interno al cambiar contraseña")
+  }
+}
+
+module.exports={ verPerfil, verPerfilPublico, actualizarPerfil, obtenerEstadoRelacion, obtenerEstadosRelacion, crearAlbumCompartido, cambiarContrasena };
