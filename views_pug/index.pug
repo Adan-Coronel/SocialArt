@@ -45,6 +45,12 @@ html(lang="es")
           input(type="password" name="vUsuarioContraseña" required)
           button(type="submit") Registrarme
 
+    script.
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.location.hash === '#registro') {
+          abrirModal('registroModal');
+        }
+      });
     if errorRegistro
         script.
             document.addEventListener('DOMContentLoaded', () => {

@@ -6,7 +6,6 @@ const toggleReaction = async (req, res) => {
     const imageId = Number.parseInt(req.params.imageId)
     const userId = req.user.idUser
 
-    // Verificar si ya existe la reacción
     const reaccionExistente = await Reaction.findOne({
       where: {
         image_id: imageId,
@@ -15,10 +14,10 @@ const toggleReaction = async (req, res) => {
     })
 
     if (reaccionExistente) {
-      // Eliminar reacción
+
       await reaccionExistente.destroy()
 
-      // Contar reacciones actuales
+
       const totalReacciones = await Reaction.count({
         where: { image_id: imageId },
       })
@@ -29,14 +28,14 @@ const toggleReaction = async (req, res) => {
         totalReacciones,
       })
     } else {
-      // Crear nueva reacción
+
       await Reaction.create({
         image_id: imageId,
         user_id: userId,
         tipo: "like",
       })
 
-      // Obtener información de la imagen para notificación
+    
       const imagen = await Image.findByPk(imageId, {
         include: [
           {
@@ -59,7 +58,7 @@ const toggleReaction = async (req, res) => {
         }
       }
 
-      // Contar reacciones actuales
+      
       const totalReacciones = await Reaction.count({
         where: { image_id: imageId },
       })

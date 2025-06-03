@@ -122,7 +122,7 @@ const verTodasLasNotificaciones = async (req, res) => {
 
     res.render("notificaciones", {
       notificaciones,
-      user: req.user,
+      usuarioLogueado: req.user,
       title: "Todas las Notificaciones",
     })
   } catch (err) {
@@ -212,4 +212,5 @@ module.exports = {
   obtenerNotificacionesPendientes,
   verTodasLasNotificaciones,
   manejarAccionNotificacion, marcarComoLeida,
+  crearNotificacionReaccion
 }

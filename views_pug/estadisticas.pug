@@ -1,0 +1,123 @@
+extends layout
+
+block content
+  link(rel="stylesheet", href="/estadisticas.css")
+  .estadisticas-page-container
+    .estadisticas-page-header
+      h1 📊 Mis Estadísticas
+      p Resumen de tu actividad en SocialArt
+
+    .estadisticas-content-page
+      .loading Cargando estadísticas...
+
+  script(src="/estadisticas.js")
+  script.
+    class EstadisticasPageManager {
+      constructor() {
+        this.container = document.querySelector('.estadisticas-content-page')
+        this.cargarEstadisticas()
+      }
+
+      async cargarEstadisticas() {
+        try {
+          this.container.innerHTML = '<div class="loading">Cargando estadísticas...</div>'
+
+          const response = await fetch("/estadisticas/perfil")
+          const data = await response.json()
+
+          if (data.success) {
+            this.mostrarEstadisticas(data.estadisticas)
+          } else {
+            this.container.innerHTML =
+              '<div class="error">Error al cargar estadísticas: ' + (data.error || "Error desconocido") + "</div>"
+          }
+        } catch (err) {
+          console.error("Error al cargar estadísticas:", err)
+          this.container.innerHTML = '<div class="error">Error de conexión: ' + err.message + "</div>"
+        }
+      }
+
+      mostrarEstadisticas(stats) {
+        this.container.innerHTML = `
+          <div class="estadisticas-grid-page">
+            <div class="estadistica-card-large">
+              <div class="estadistica-numero">${stats.totalAlbumes}</div>
+              <div class="estadistica-label">Álbumes Creados</div>
+              <div class="estadistica-descripcion">Total de álbumes que has creado</div>
+            </div>
+            <div class="estadistica-card-large">
+              <div class="estadistica-numero">${stats.totalImagenes}</div>
+              <div class="estadistica-label">Imágenes Subidas</div>
+              <div class="estadistica-descripcion">Todas las imágenes en tus álbumes</div>
+            </div>
+            <div class="estadistica-card-large">
+              <div class="estadistica-numero">${stats.totalReaccionesRecibidas}</div>
+              <div class="estadistica-label">Me Gusta Recibidos</div>
+              <div class="estadistica-descripcion">Reacciones en todas tus imágenes</div>
+            </div>
+            <div class="estadistica-card-large">
+              <div class="estadistica-numero">${stats.totalComentariosRecibidos}</div>
+              <div class="estadistica-label">Comentarios Recibidos</div>
+              <div class="estadistica-descripcion">Comentarios en todas tus imágenes</div>
+            </div>
+          </div>
+
+          <div class="estadisticas-detalle">
+            <div class="album-popular-large">
+              <h3>🏆 Álbum Más Popular</h3>
+              ${
+                stats.albumMasPopular
+                  ? `
+                <div class="album-info">
+                  <h4>${stats.albumMasPopular.titulo}</h4>
+                  <p>${stats.albumMasPopular.totalReacciones} reacciones</p>
+                  <small>Este es tu álbum con más interacciones</small>
+                </div>
+              `
+                  : `
+                <div class="album-info">
+                  <p>Aún no tienes álbumes con reacciones</p>
+                  <small>Comparte más contenido para generar interacciones</small>
+                </div>
+              `
+              }
+            </div>
+
+            <div class="actividad-reciente-large">
+              <h3>📈 Actividad Reciente (últimos 30 días)</h3>
+              <div class="actividad-grid">
+                <div class="actividad-item-large">
+                  <span class="actividad-numero">${stats.actividadReciente.imagenesSubidas}</span>
+                  <span class="actividad-texto">Imágenes subidas</span>
+                </div>
+                <div class="actividad-item-large">
+                  <span class="actividad-numero">${stats.actividadReciente.comentariosRecibidos}</span>
+                  <span class="actividad-texto">Comentarios recibidos</span>
+                </div>
+                <div class="actividad-item-large">
+                  <span class="actividad-numero">${stats.actividadReciente.reaccionesRecibidas}</span>
+                  <span class="actividad-texto">Reacciones recibidas</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="consejos-section">
+            <h3>💡 Consejos para mejorar tu perfil</h3>
+            <div class="consejos-grid">
+              ${stats.totalImagenes < 10 ? '<div class="consejo">📸 Sube más imágenes para mostrar tu trabajo</div>' : ''}
+              ${stats.totalAlbumes < 3 ? '<div class="consejo">📁 Crea más álbumes para organizar tu arte</div>' : ''}
+              ${stats.totalReaccionesRecibidas < 5 ? '<div class="consejo">❤️ Interactúa con otros artistas para recibir más reacciones</div>' : ''}
+              ${stats.totalComentariosRecibidos < 3 ? '<div class="consejo">💬 Comenta en otros álbumes para generar conversaciones</div>' : ''}
+              ${stats.totalImagenes >= 10 && stats.totalAlbumes >= 3 && stats.totalReaccionesRecibidas >= 5 && stats.totalComentariosRecibidos >= 3 ?'<div class="consejo">Tu perfil se ve re bien :D</div>' : ''}
+            </div>
+          </div>
+        `
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      new EstadisticasPageManager()
+    })
+
+    

@@ -2,8 +2,8 @@ extends layout
 
 block content
   link(rel="stylesheet", href="/perfil.css")
-  link(rel="stylesheet", href="/estadisticas.css")
-  h1 Bienvenida, #{user.nombre}
+
+  h1 Bienvenido/a, #{user.nombre}
 
   if user.foto
     img(src=user.foto width="150")
@@ -24,6 +24,7 @@ block content
         else
           span (Privado)
         a(href=`/albums/${album.idAlbum}`) Ver
+        button(type="button", onclick=`mostrarModalEditarAlbum(${album.idAlbum}, '${album.titulo}', ${album.is_public})`) Editar
         button(type="button", onclick=`window.location.href='/visibilidad/${album.idAlbum}'`) Configurar visibilidad
         button(type="button", onclick=`abrirModalEliminar(${album.idAlbum})`) Eliminar
   else
@@ -52,12 +53,34 @@ block content
         label Público:
         input(type="checkbox", name="is_public")
 
-        label Tags (opcional):
+        label Tags (máximo 5):
+        .tags-selector
+          select#tagsSelect(size="8")
+          .tags-seleccionadas
+            p.limite-tags Puedes seleccionar hasta 5 tags
+            .tags-lista
         select#tagsSelect(name="tags", multiple, size="8")
 
         button(type="submit") Crear
         button(type="button", onclick="cerrarModalAlbum()") Cancelar
+  .modal#modalEditarAlbum
+    .modal-fondo(onclick="cerrarModalEditarAlbum()")
+    .modal-contenido
+      h2 Editar álbum
+      form(id="formEditarAlbum", method="POST")
+        label Título:
+        input(type="text", name="titulo", id="editTitulo", required)
+        label Público:
+        input(type="checkbox", name="is_public", id="editPublico")
+        label Tags (máximo 5):
+        .tags-selector
+          select#editTagsSelect(size="8")
+          .tags-seleccionadas
+            p.limite-tags Puedes seleccionar hasta 5 tags
+            .tags-lista#editTagsLista
 
+        button(type="submit") Guardar cambios
+        button(type="button", onclick="cerrarModalEditarAlbum()") Cancelar
   .modal#modalEditar
     .modal-fondo(onclick="cerrarModalEditar()")
     .modal-contenido
@@ -82,54 +105,126 @@ block content
     .modal-fondo(onclick="cerrarModalContrasena()")
     .modal-contenido
       h2 Cambiar contraseña
-      form(action="/perfil/cambiar-contrasena", method="POST")
+      .caps-warning#capsWarning(style="display: none;")
+        | ⚠️ Las mayúsculas están activadas
+      .error-container#errorContrasena(style="display: none;")
+      form(action="/perfil/cambiar-contrasena", method="POST", onsubmit="return cambiarContrasena(event)")
         label Contraseña actual:
-        input(type="password", name="contrasenaActual", required)
+        input(type="password", name="contrasenaActual", id="contrasenaActual", required, onkeyup="checkCapsLock(event)")
 
         label Nueva contraseña:
-        input(type="password", name="nuevaContrasena", required)
+        input(type="password", name="nuevaContrasena", id="nuevaContrasena", required, onkeyup="checkCapsLock(event)")
 
         label Confirmar nueva contraseña:
-        input(type="password", name="confirmarContrasena", required)
+        input(type="password", name="confirmarContrasena", id="confirmarContrasena", required, onkeyup="checkCapsLock(event)")
 
         button(type="submit") Cambiar contraseña
         button(type="button", onclick="cerrarModalContrasena()") Cancelar
   .modal#modalEliminar
     .modal-fondo(onclick="cerrarModalEliminar()")
     .modal-contenido
-      h2 ¿Estás segura de que querés eliminar este álbum?
+      h2 ¿Estás seguro/a de que querés eliminar este álbum?
       form(id="formEliminar", method="POST")
         button(type="submit") Confirmar
         button(type="button", onclick="cerrarModalEliminar()") Cancelar
-  script(src="/estadisticas.js")
+
   script.
+    let tagsDisponibles = [];
+    let tagsSeleccionadas = [];
+    let albumEditando = null;
+
+    function checkCapsLock(event) {
+      const capsWarning = document.getElementById('capsWarning');
+      
+      if (event.getModifierState && event.getModifierState('CapsLock')) {
+        capsWarning.style.display = 'block';
+      } else {
+        capsWarning.style.display = 'none';
+      }
+    }
     async function cargarTags() {
       try {
         const response = await fetch('/tags/api/todas');
         const data = await response.json();
         
         if (data.success) {
-          const select = document.getElementById('tagsSelect');
-          select.innerHTML = '';
-          
-          data.tags.forEach(tag => {
-            const option = document.createElement('option');
-            option.value = tag.idTag;
-            option.textContent = tag.nombreTag;
-            select.appendChild(option);
-          });
+          tagsDisponibles = data.tags;
+          mostrarTagsEnSelect('tagsSelect');
+          mostrarTagsEnSelect('editTagsSelect');
         }
       } catch (err) {
         console.error('Error al cargar tags:', err);
       }
     }
-    
+    function mostrarTagsEnSelect(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '';
+      
+      tagsDisponibles.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag.idTag;
+        option.textContent = tag.nombreTag;
+        option.onclick = () => agregarTag(tag, selectId === 'editTagsSelect');
+        select.appendChild(option);
+      });
+    }
+
+    function agregarTag(tag, esEdicion = false) {
+      const lista = esEdicion ? 'editTagsLista' : 'tags-lista';
+      const contenedor = document.querySelector(esEdicion ? '#editTagsLista' : '.tags-lista');
+
+      const tagsActuales = contenedor.querySelectorAll('.tag-seleccionada');
+      if (tagsActuales.length >= 5) {
+        alert('Solo puedes seleccionar hasta 5 tags');
+        return;
+      }
+
+      if (contenedor.querySelector(`[data-tag-id="${tag.idTag}"]`)) {
+        return;
+      }
+
+      const tagElement = document.createElement('div');
+      tagElement.className = 'tag-seleccionada';
+      tagElement.setAttribute('data-tag-id', tag.idTag);
+      tagElement.innerHTML = `
+        <span>${tag.nombreTag}</span>
+        <button type="button" onclick="quitarTag(${tag.idTag}, ${esEdicion})" class="quitar-tag">×</button>
+        <input type="hidden" name="tags" value="${tag.idTag}">
+      `;
+      
+      contenedor.appendChild(tagElement);
+    }
+
+    function quitarTag(tagId, esEdicion = false) {
+      const contenedor = document.querySelector(esEdicion ? '#editTagsLista' : '.tags-lista');
+      const tagElement = contenedor.querySelector(`[data-tag-id="${tagId}"]`);
+      if (tagElement) {
+        tagElement.remove();
+      }
+    }
     function mostrarModalAlbum() {
       cargarTags();
       document.getElementById('modalAlbum').style.display = 'flex';
     }
     function cerrarModalAlbum() {
       document.getElementById('modalAlbum').style.display = 'none';
+      document.querySelector('.tags-lista').innerHTML = '';
+    }
+    function mostrarModalEditarAlbum(albumId, titulo, esPublico) {
+      albumEditando = albumId;
+      document.getElementById('editTitulo').value = titulo;
+      document.getElementById('editPublico').checked = esPublico;
+      document.getElementById('formEditarAlbum').action = `/albums/${albumId}/editar`;
+
+      document.getElementById('editTagsLista').innerHTML = '';
+      
+      cargarTags();
+      document.getElementById('modalEditarAlbum').style.display = 'flex';
+    }
+    function cerrarModalEditarAlbum() {
+      document.getElementById('modalEditarAlbum').style.display = 'none';
+      document.getElementById('editTagsLista').innerHTML = '';
+      albumEditando = null;
     }
     function mostrarModalEditar() {
       document.getElementById('modalEditar').style.display = 'flex';
@@ -139,9 +234,87 @@ block content
     }
     function mostrarModalContrasena() {
       document.getElementById('modalContrasena').style.display = 'flex';
+      const errorContainer = document.getElementById('errorContrasena');
+      errorContainer.style.display = 'none';
+      errorContainer.innerHTML = '';
+      document.getElementById('capsWarning').style.display = 'none';
     }
     function cerrarModalContrasena() {
       document.getElementById('modalContrasena').style.display = 'none';
+      document.getElementById('contrasenaActual').value = '';
+      document.getElementById('nuevaContrasena').value = '';
+      document.getElementById('confirmarContrasena').value = '';
+    }
+    async function cambiarContrasena2(event) {
+      event.preventDefault();
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      const errorContainer = document.getElementById('errorContrasena');
+      
+      try {
+        const response = await fetch('/perfil/cambiar-contrasena', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          alert('Contraseña cambiada exitosamente');
+          cerrarModalContrasena();
+          form.reset();
+        } else {
+          const errorText = await response.text();
+          errorContainer.innerHTML = `<p style="color: red; margin: 0;">${errorText}</p>`;
+          errorContainer.style.display = 'block';
+        }
+      } catch (err) {
+        errorContainer.innerHTML = `<p style="color: red; margin: 0;">Error de conexión</p>`;
+        errorContainer.style.display = 'block';
+      }
+      
+      return false;
+    }
+    async function cambiarContrasena(event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const contrasenaActual = form.querySelector('#contrasenaActual').value;
+      const nuevaContrasena   = form.querySelector('#nuevaContrasena').value;
+      const confirmarContrasena = form.querySelector('#confirmarContrasena').value;
+
+      const errorContainer = document.getElementById('errorContrasena');
+      errorContainer.innerHTML = '';
+      errorContainer.style.display = 'none';
+
+      try {
+        const response = await fetch('/perfil/cambiar-contrasena', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contrasenaActual,
+            nuevaContrasena,
+            confirmarContrasena
+          })
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          errorContainer.innerHTML = `<p style="color: red; margin: 0;">${data.error}</p>`;
+          errorContainer.style.display = 'block';
+        } else {
+          alert(data.message || 'Contraseña cambiada exitosamente');
+          cerrarModalContrasena();
+          form.reset();
+        }
+      } catch (err) {
+        console.error("Error en fetch o parseo:", err);
+        errorContainer.innerHTML = `<p style="color: red; margin: 0;">Error de conexión</p>`;
+        errorContainer.style.display = 'block';
+      }
+
+      return false;
     }
     function abrirModalEliminar(id) {
       document.getElementById('modalEliminar').style.display = 'flex';

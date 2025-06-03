@@ -20,6 +20,9 @@ block content
           label
             input(type="radio", name="tipo", value="albumes", checked=tipo === 'albumes')
             | Álbumes
+          label
+            input(type="radio", name="tipo", value="tags", checked=tipo === 'tags')
+            | Tags
         button(type="submit") Filtrar
 
     if resultados.usuarios.length || resultados.albumes.length
@@ -83,13 +86,11 @@ block content
 
                 .album-actions
                   a.btn-ver(href=`/albums/${album.idAlbum}`) Ver álbum
-    else
+    else if query
       .sin-resultados
         h2 No se encontraron resultados
-        if query
-          p No hay contenido que coincida con "#{query}"
-        else
-          p Ingresa un término de búsqueda
+        p No hay contenido que coincida con "#{query}"
+       
 
   style.
     .busqueda-container {

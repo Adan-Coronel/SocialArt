@@ -28,9 +28,14 @@ block content
               button.btn-aceptar(onclick=`manejarAccion(${notificacion.idNotification}, 'aceptar')`) Aceptar
               button.btn-rechazar(onclick=`manejarAccion(${notificacion.idNotification}, 'rechazar')`) Rechazar
             else if notificacion.tipo === 'comentario'
-              a.btn-ver(href=`/albums/${notificacion.ref_id}`) Ver comentario
+              a.btn-ver(href=`/comentarios/info/${notificacion.ref_id}`) Ver comentario
+              button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
             else if notificacion.tipo === 'solicitud_aceptada'
               a.btn-ver(href=`/perfil/${notificacion.emisor.idUser}`) Ver perfil
+              button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
+            else if notificacion.tipo === 'reaccion'
+              a.btn-ver(onclick=`irAImagenDesdeReaccion(${notificacion.ref_id}), ${notificacion.idNotification})`) Ver imagen
+              button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
             else
               span.accion-completada ✓ Procesada
     else
@@ -53,5 +58,37 @@ block content
         }
       } catch (err) {
         alert('Error de conexión');
+      }
+    }
+    async function marcarComoLeida(notificationId) {
+      try {
+        const response = await fetch(`/notificaciones/marcar-leida/${notificationId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert('Error al marcar como leída');
+        }
+      } catch (err) {
+        alert('Error de conexión');
+      }
+    }
+    async function irAImagenDesdeReaccion(imageId) {
+      try {
+        await marcarComoLeida(notificationId);
+        const response = await fetch(`/albums/info/${imageId}`);
+        const data = await response.json();
+        
+        if (data.success && data.albumId) {
+          window.location.href = `/albums/${data.albumId}#imagen-${imageId}`;
+        } else {
+          window.location.href = '/albums';
+        }
+      } catch (err) {
+        console.error('Error al ir a la imagen:', err);
+        window.location.href = '/albums';
       }
     }

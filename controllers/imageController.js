@@ -1,4 +1,4 @@
-const { Image } = require('../models/indexModel');
+const { Image, Album } = require('../models/indexModel');
 
 const subirImagen = async (req, res) => {
 
@@ -65,4 +65,31 @@ const eliminarImagen = async (req, res) => {
     res.status(500).send('Error al eliminar imagen');
   }
 };
-module.exports = { subirImagen, eliminarImagen };
+const obtenerInfoImagen = async (req, res) => {
+  try {
+    const imageId = Number.parseInt(req.params.imageId)
+
+    const imagen = await Image.findByPk(imageId, {
+      include: [
+        {
+          model: Album,
+          attributes: ["idAlbum"],
+        },
+      ],
+    })
+
+    if (!imagen || !imagen.Album) {
+      return res.status(404).json({ error: "Imagen no encontrada" })
+    }
+
+    res.json({
+      success: true,
+      albumId: imagen.Album.idAlbum,
+      imageId: imagen.idImage,
+    })
+  } catch (err) {
+    console.error("Error al obtener información de la imagen:", err)
+    res.status(500).json({ error: "Error interno" })
+  }
+};
+module.exports = { subirImagen, eliminarImagen, obtenerInfoImagen };

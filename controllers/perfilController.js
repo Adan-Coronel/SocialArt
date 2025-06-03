@@ -44,9 +44,20 @@ const verPerfil = async (req, res) => {
   if (!req.user) return res.redirect('/');
 
   const usuario = await User.findByPk(req.user.idUser, {
-    include: [{ model: Album, as: 'albums' }]
+    include: [
+      {
+       model: Album, 
+       as: 'albums',
+       include: [
+          {
+            model: SharedAlbum,
+            required: false,
+          },
+        ]
+      }
+    ]
   });
-
+  usuario.albums = usuario.albums.filter(album => !album.SharedAlbums || album.SharedAlbums.length === 0);
   if (!usuario) return res.redirect('/');
 
   const albumesCompartidos = await SharedAlbum.findAll({
@@ -228,25 +239,41 @@ const obtenerEstadosRelacion = async (usuarioLogueado, otroUsuario) => {
     solicitudEnviada: !!solicitudEnviada,
   }
 }
-
 const cambiarContrasena = async (req, res) => {
   try {
+
+    if (!req.body || typeof req.body !== "object") {
+      return res.status(400).json({ error: "Datos de formulario inválidos" })
+    }
+
     const { contrasenaActual, nuevaContrasena, confirmarContrasena } = req.body
     const userId = req.user.idUser
 
-    if (nuevaContrasena !== confirmarContrasena) {
-      return res.status(400).send("Las nuevas contraseñas no coinciden")
+    if (!contrasenaActual || !nuevaContrasena || !confirmarContrasena) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios" })
     }
 
+    if (!contrasenaActual.trim() || !nuevaContrasena.trim() || !confirmarContrasena.trim()) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios" })
+    }
 
     const usuario = await User.findByPk(userId)
     if (!usuario) {
-      return res.status(404).send("Usuario no encontrado")
+      return res.status(404).json({ error: "Usuario no encontrado" })
     }
 
     const contrasenaValida = await bcrypt.compare(contrasenaActual, usuario.pwd_hash)
     if (!contrasenaValida) {
-      return res.status(400).send("La contraseña actual es incorrecta")
+      return res.status(400).json({ error: "La contraseña actual es incorrecta" })
+    }
+
+    const esLaMismaContrasena = await bcrypt.compare(nuevaContrasena, usuario.pwd_hash)
+    if (esLaMismaContrasena) {
+      return res.status(400).json({ error: "La contraseña actual y la contraseña nueva son iguales" })
+    }
+
+    if (nuevaContrasena !== confirmarContrasena) {
+      return res.status(400).json({ error: "Las nuevas contraseñas no coinciden" })
     }
 
 
@@ -254,11 +281,12 @@ const cambiarContrasena = async (req, res) => {
 
     await User.update({ pwd_hash: nuevaContrasenaHash }, { where: { idUser: userId } })
 
-    res.redirect("/perfil?mensaje=Contraseña cambiada exitosamente")
+    res.status(200).json({ success: true, message: "Contraseña cambiada exitosamente" })
   } catch (err) {
     console.error("Error al cambiar contraseña:", err)
-    res.status(500).send("Error interno al cambiar contraseña")
+    res.status(500).json({ error: "Error interno del servidor" })
   }
 }
+
 
 module.exports = { verPerfil, verPerfilPublico, actualizarPerfil, obtenerEstadoRelacion, obtenerEstadosRelacion, crearAlbumCompartido, cambiarContrasena };

@@ -24,7 +24,7 @@ block content
               p Cargando seguidores...
             
             button.btn-guardar(onclick=`guardarVisibilidad(${imagen.idImage})`) 
-              Guardar configuración
+              Guardar Guardar cambios
     else
       .sin-imagenes
         p Este álbum no tiene imágenes aún.
@@ -57,33 +57,53 @@ block content
 
     function mostrarSeguidores(imageId, seguidores) {
       const container = document.getElementById(`seguidores-${imageId}`);
+      const btn = document.querySelector(`button[onclick="guardarVisibilidad(${imageId})"]`);
       
       if (seguidores.length === 0) {
         container.innerHTML = '<p>No tienes seguidores aún.</p>';
+        if (btn) btn.disabled = true;
         return;
       }
 
-      const html = seguidores.map(seguidor => `
-        <div class="seguidor-item">
-          ${seguidor.foto 
-            ? `<img class="seguidor-avatar" src="${seguidor.foto}" alt="${seguidor.nombre}">`
-            : `<div class="seguidor-avatar-placeholder">${seguidor.nombre.charAt(0)}</div>`
-          }
-          <div class="seguidor-info">
-            <div class="seguidor-nombre">${seguidor.nombre}</div>
-          </div>
-          <div class="checkbox-container">
-            <input type="checkbox" 
-                   id="seguidor-${imageId}-${seguidor.idUser}" 
-                   value="${seguidor.idUser}" 
-                   checked>
-          </div>
-        </div>
-      `).join('');
+      cargarConfiguracionExistente(imageId).then(configuracion => {
+        const html = seguidores.map(seguidor => {
+          const estaPermitido = configuracion.length === 0 || configuracion.includes(seguidor.idUser);
+          return `
+            <div class="seguidor-item">
+              ${seguidor.foto 
+                ? `<img class="seguidor-avatar" src="${seguidor.foto}" alt="${seguidor.nombre}">`
+                : `<div class="seguidor-avatar-placeholder">${seguidor.nombre.charAt(0)}</div>`
+              }
+              <div class="seguidor-info">
+                <div class="seguidor-nombre">${seguidor.nombre}</div>
+              </div>
+              <div class="checkbox-container">
+                <input type="checkbox" 
+                       id="seguidor-${imageId}-${seguidor.idUser}" 
+                       value="${seguidor.idUser}" 
+                       ${estaPermitido ? 'checked' : ''}>
+              </div>
+            </div>
+          `;
+        }).join('');
 
-      container.innerHTML = html;
+        container.innerHTML = html;
+        if (btn) btn.disabled = false;
+      });
     }
 
+    async function cargarConfiguracionExistente(imageId) {
+      try {
+        const response = await fetch(`/visibilidad/imagen/${imageId}/config`);
+        if (response.ok) {
+          const data = await response.json();
+          return data.usuariosPermitidos || [];
+        }
+      } catch (err) {
+        console.error('Error al cargar configuración:', err);
+      }
+      return [];
+    }
     async function guardarVisibilidad(imageId) {
       try {
         const checkboxes = document.querySelectorAll(`#seguidores-${imageId} input[type="checkbox"]:checked`);

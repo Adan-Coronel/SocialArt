@@ -1,7 +1,5 @@
 /node_modules
 .env
 /public/notificaciones.css
-/public/notificaciones.js
-/views_pug/solicitudes.pug
 /public/muro.css
 *.css

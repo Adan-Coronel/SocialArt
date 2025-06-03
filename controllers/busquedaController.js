@@ -70,7 +70,7 @@ async function buscarContenido(req, res) {
       })
     }
 
-    if (tipo === "todo") {
+    if (tipo === "todo" || tipo === "tags") {
       const albumesPorTags = await Album.findAll({
         include: [
           {

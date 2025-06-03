@@ -8,7 +8,7 @@ inicializarSocketIO(server);
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Servidor en http://localhost:${PORT}`);
     console.log("Socket.IO inicializado para notificaciones en tiempo real");
   });

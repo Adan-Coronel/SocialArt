@@ -1,4 +1,4 @@
-const { Album, Image, User, FriendRequest } = require("../models/indexModel");
+const { Album, Image, User, FriendRequest, Tag, SharedAlbum } = require("../models/indexModel");
 const { Op } = require("sequelize");
 
 async function verMuro(req, res) {
@@ -27,8 +27,20 @@ async function verMuro(req, res) {
           model: Image,
           limit: 1,
           order: [["created_at", "DESC"]]
+        },
+        {
+          model: Tag,
+          attributes: ["idTag", "nombreTag"],
+        },
+        {
+          model: SharedAlbum,
+          required: false,
         }
       ],
+      where: {
+        ...filtroVitrina,
+        "$SharedAlbums.album_id$": null,
+      },
       order: [["created_at", "DESC"]]
     });
 
@@ -60,8 +72,21 @@ async function verMuro(req, res) {
               model: Image,
               limit: 3,
               order: [["created_at", "DESC"]]
-            }
+            },
+            {
+              model: Tag,
+              attributes: ["idTag", "nombreTag"],
+            },
+            {
+              model: SharedAlbum,
+              required: false,
+            },
           ],
+          where: {
+            user_id: { [Op.in]: idsSeguidos },
+            is_public: false,
+            "$SharedAlbums.album_id$": null,
+          },
           order: [["created_at", "DESC"]]
         });
 

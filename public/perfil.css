@@ -370,12 +370,99 @@ footer p {
       transition: background-color 0.2s ease;
     }
     
-    .btn-guardar:hover {
+    .btn-guardar:hover:not(:disabled) {
       background: #218838;
     }
-    
+    .btn-guardar:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
     .sin-imagenes {
       text-align: center;
       padding: 3rem;
       color: #666;
+    }
+
+
+    .tags-selector {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    #tagsSelect, #editTagsSelect {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.5rem;
+    }
+    
+    #tagsSelect option, #editTagsSelect option {
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+    
+    #tagsSelect option:hover, #editTagsSelect option:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .tags-seleccionadas {
+      flex: 1;
+    }
+    
+    .limite-tags {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .tags-lista, #editTagsLista {
+      min-height: 100px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.5rem;
+      background: #f9f9f9;
+    }
+    
+    .tag-seleccionada {
+      display: inline-flex;
+      align-items: center;
+      background: #4a90e2;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      margin: 0.25rem;
+      font-size: 0.8rem;
+    }
+    
+    .quitar-tag {
+      background: none;
+      border: none;
+      color: white;
+      margin-left: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .quitar-tag:hover {
+      color: #ffcccc;
+    }
+    
+    .error-container {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+
+    .caps-warning {
+      background: #fff3cd;
+      color: #856404;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      border: 1px solid #ffeaa7;
+      text-align: center;
+      font-weight: bold;
     }
