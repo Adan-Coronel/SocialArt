@@ -42,41 +42,53 @@ const obtenerEstadoRelacion = async (usuarioLogueado, otroUsuario) => {
 }
 const verPerfil = async (req, res) => {
   if (!req.user) return res.redirect('/');
+  try {
+    const usuario = await User.findByPk(req.user.idUser, {
+      include: [
+        {
+          model: Album,
+          as: 'albums',
+          include: [
+            {
+              model: SharedAlbum,
+              required: false,
+            },
+          ]
+        }
+      ]
+    });
+    usuario.albums = usuario.albums.filter(album => !album.SharedAlbums || album.SharedAlbums.length === 0);
+    if (!usuario) return res.redirect('/');
 
-  const usuario = await User.findByPk(req.user.idUser, {
-    include: [
-      {
-       model: Album, 
-       as: 'albums',
-       include: [
-          {
-            model: SharedAlbum,
-            required: false,
-          },
-        ]
-      }
-    ]
-  });
-  usuario.albums = usuario.albums.filter(album => !album.SharedAlbums || album.SharedAlbums.length === 0);
-  if (!usuario) return res.redirect('/');
+    const albumesCompartidos = await SharedAlbum.findAll({
+      where: { viewer_id: req.user.idUser },
+      include: [
+        {
+          model: Album,
+          include: [{ model: User, as: "propietario", attributes: ["idUser", "nombre", "foto"] }]
+        },
+        {
+          model: User,
+          as: "propietario",
+          attributes: ["idUser", "nombre", "foto"]
+        }
+      ],
+      order: [["created_at", "DESC"]],
+    })
 
-  const albumesCompartidos = await SharedAlbum.findAll({
-    where: { viewer_id: req.user.idUser },
-    include: [
-      {
-        model: Album,
-        include: [{ model: User, as: "propietario", attributes: ["idUser","nombre", "foto"] }]
-      },
-      {
-        model: User,
-        as: "propietario",
-        attributes: ["idUser","nombre", "foto"]
-      } 
-    ],
-    order: [["created_at", "DESC"]],
-  })
+    res.render('perfil', { usuarioLogueado: req.user, user: usuario, albumesCompartidos });
+  } catch (err) {
+    console.error("Error al cargar perfil:", err)
+    res.status(500).render("error", {
+      titulo: "Error interno",
+      mensaje: "Ha ocurrido un error al cargar tu perfil.",
+      botonTexto: "Volver al muro",
+      botonUrl: "/muro",
+      usuarioLogueado: req.user,
+    })
+  }
 
-  res.render('perfil', { usuarioLogueado: req.user, user: usuario, albumesCompartidos });
+
 };
 
 const crearAlbumCompartido = async (ownerId, viewerId) => {
@@ -126,12 +138,27 @@ const verPerfilPublico = async (req, res) => {
   try {
     const userId = Number.parseInt(req.params.userId)
     const usuarioLogueado = req.user
+    if (isNaN(userId)) {
+      return res.status(404).render("error", {
+        titulo: "Usuario no encontrado",
+        mensaje: "El ID de usuario no es válido.",
+        botonTexto: "Volver al muro",
+        botonUrl: "/muro",
+        usuarioLogueado,
+      })
+    }
     const usuario = await User.findByPk(userId, {
       attributes: ["idUser", "nombre", "email", "foto", "intereses", "antecedentes", "created_at"],
     })
 
     if (!usuario) {
-      return res.status(404).send("Usuario no encontrado")
+      return res.status(404).render("error", {
+        titulo: "Usuario no encontrado",
+        mensaje: "El usuario que buscas no existe.",
+        botonTexto: "Volver al muro",
+        botonUrl: "/muro",
+        usuarioLogueado,
+      })
     }
 
     if (usuarioLogueado && usuarioLogueado.idUser === userId) {
@@ -167,7 +194,13 @@ const verPerfilPublico = async (req, res) => {
     })
   } catch (err) {
     console.error("Error al cargar perfil público:", err)
-    res.status(500).send("Error interno al cargar perfil")
+    res.status(500).render("error", {
+      titulo: "Error interno",
+      mensaje: "Ha ocurrido un error al cargar el perfil.",
+      botonTexto: "Volver al muro",
+      botonUrl: "/muro",
+      usuarioLogueado: req.user,
+    })
   }
 }
 
@@ -191,7 +224,13 @@ const actualizarPerfil = async (req, res) => {
     res.redirect('/perfil');
   } catch (err) {
     console.error('Error al actualizar perfil:', err);
-    res.status(500).send('Error al actualizar perfil');
+    res.status(500).render("error", {
+      titulo: "Error al actualizar perfil",
+      mensaje: "Ha ocurrido un error al actualizar tu perfil.",
+      botonTexto: "Volver al perfil",
+      botonUrl: "/perfil",
+      usuarioLogueado: req.user,
+    })
   }
 };
 

@@ -8,8 +8,8 @@ block content
       a.btn-volver(href=`/albums/${album.idAlbum}`) ← Volver al álbum
 
     .instrucciones
-      p Selecciona qué usuarios pueden ver cada imagen de este álbum. Por defecto, todos tus seguidores pueden ver las imágenes.
-
+      p Este álbum es <strong>privado</strong>. Puedes controlar qué seguidores pueden ver cada imagen.
+      p.nota-publica Si cambias el álbum a público, todas las imágenes serán visibles para todos los usuarios.
     if album.Images && album.Images.length
       each imagen in album.Images
         .imagen-config
@@ -97,6 +97,9 @@ block content
         const response = await fetch(`/visibilidad/imagen/${imageId}/config`);
         if (response.ok) {
           const data = await response.json();
+          if (data.esPublico) {
+            return [];
+          }
           return data.usuariosPermitidos || [];
         }
       } catch (err) {

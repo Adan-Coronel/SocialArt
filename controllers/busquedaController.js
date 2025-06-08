@@ -1,4 +1,4 @@
-const { User, Album, Image, Tag } = require('../models/indexModel');
+const { User, Album, Image, Tag, SharedAlbum } = require('../models/indexModel');
 const { Op } = require('sequelize');
 
 async function buscarContenido(req, res) {
@@ -21,14 +21,14 @@ async function buscarContenido(req, res) {
   const resultados = { usuarios: [], albumes: [], imagenes: [] }
 
   try {
-    if (tipo === "usuarios" || tipo === "todo") {
+    if ((tipo === "usuarios" || tipo === "todo") && usuarioLogueado) {
       resultados.usuarios = await User.findAll({
         where: {
           [Op.or]: [
             { nombre: { [Op.like]: `%${query}%` } },
             { email: { [Op.like]: `%${query}%` } }
           ],
-          ...(usuarioLogueado && { idUser: { [Op.ne]: usuarioLogueado.idUser } }),
+          idUser: { [Op.ne]: usuarioLogueado.idUser },
         },
         attributes: ['idUser', 'nombre', 'email', 'foto'],
         limit: 10,
@@ -64,13 +64,20 @@ async function buscarContenido(req, res) {
             order: [["created_at", "DESC"]],
             required: false,
           },
+          {
+            model: SharedAlbum,
+           as: "SharedAlbums",
+            required: false,
+          }
         ],
         limit: 10,
         order: [["created_at", "DESC"]],
       })
+      resultados.albumes = resultados.albumes.filter((album) => !album.SharedAlbums || album.SharedAlbums.length === 0)
     }
 
     if (tipo === "todo" || tipo === "tags") {
+      const whereTagAlbum = usuarioLogueado ? {} : { is_public: true }
       const albumesPorTags = await Album.findAll({
         include: [
           {
@@ -90,15 +97,20 @@ async function buscarContenido(req, res) {
             order: [["created_at", "DESC"]],
             required: false,
           },
+          {
+            model: SharedAlbum,
+             as: "SharedAlbums",
+            required: false,
+          }
         ],
-        where: usuarioLogueado ? {} : { is_public: true },
+        where: whereTagAlbum,
         limit: 5,
         order: [["created_at", "DESC"]],
       })
 
-
+      const albumesFiltrados = albumesPorTags.filter((album) => !album.SharedAlbums || album.SharedAlbums.length === 0)
       const idsExistentes = resultados.albumes.map((a) => a.idAlbum)
-      albumesPorTags.forEach((album) => {
+      albumesFiltrados.forEach((album) => {
         if (!idsExistentes.includes(album.idAlbum)) {
           resultados.albumes.push(album)
         }

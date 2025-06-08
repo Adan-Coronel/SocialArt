@@ -10,6 +10,11 @@ block content
 
   p Intereses: #{user.intereses || 'No especificados'}
   p Antecedentes: #{user.antecedentes || 'No especificados'}
+
+  .seguidores-info
+    a.seguidores-link(href="/seguidores") Ver seguidores
+    a.seguidores-link(href="/siguiendo") Ver siguiendo
+
   button(onclick="mostrarModalEditar()") Editar perfil
   button(onclick="mostrarModalContrasena()") Cambiar contraseña
   h2 Tus álbumes
@@ -25,7 +30,8 @@ block content
           span (Privado)
         a(href=`/albums/${album.idAlbum}`) Ver
         button(type="button", onclick=`mostrarModalEditarAlbum(${album.idAlbum}, '${album.titulo}', ${album.is_public})`) Editar
-        button(type="button", onclick=`window.location.href='/visibilidad/${album.idAlbum}'`) Configurar visibilidad
+        if !album.is_public
+          button(type="button", onclick=`window.location.href='/visibilidad/${album.idAlbum}'`) Configurar visibilidad
         button(type="button", onclick=`abrirModalEliminar(${album.idAlbum})`) Eliminar
   else
     p Todavía no tenés álbumes propios.

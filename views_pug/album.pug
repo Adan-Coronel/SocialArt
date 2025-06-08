@@ -7,6 +7,9 @@ block content
   .album-container
     .album-header
       h1 Álbum "#{album.titulo}"
+      if esAlbumCompartido
+        .album-compartido-info
+          p.info-compartido 📤 Este es un álbum compartido con las imágenes de #{album.propietario.nombre}
       if album.Tags && album.Tags.length
         .album-tags
           p Tags: 
@@ -17,21 +20,18 @@ block content
           p Creado por: 
             a.propietario-link(href=`/perfil/${album.propietario.idUser}`) #{album.propietario.nombre}
           small Hace #{new Date(album.created_at).toLocaleDateString()}
-  
-    if usuarioLogueado && album.user_id === usuarioLogueado.idUser
-      .subir-imagen
-        h2 Subir nuevas imágenes
-        form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
-          label Imágenes (máximo 20 por álbum):
-          input(type="file", name="imagenes", multiple, accept="image/*", required)
-          label Descripción:
-          input(type="text", name="caption", placeholder="Texto opcional")
-          button(type="submit") Subir imágenes
+    if usuarioLogueado && album.user_id === usuarioLogueado.idUser && !esAlbumCompartido
+      .album-actions
+        a.btn-editar(href=`/albums/${album.idAlbum}/editar`) ✏️ Editar álbum
+    if !album.is_public
+          a.btn-visibilidad(href=`/visibilidad/${album.idAlbum}`) 👁️ Configurar visibilidad
     .imagenes-section
       h2 Imágenes
+      if esAlbumCompartido
+        p.info-compartido-imagenes Estas son las imágenes que #{album.propietario.nombre} ha compartido contigo.
       if imagenes.length
         each img in imagenes
-          .imagen-item(data-image-id=img.idImage)
+          .imagen-item(data-image-id=img.idImage, id=`imagen-${img.idImage}`)
             .imagen-container
               img.imagen-principal(src=img.url, alt=img.caption || 'Imagen del álbum')
               if img.caption
@@ -55,7 +55,20 @@ block content
               
               .comentarios-lista(id=`comentarios-${img.idImage}`)
       else
-        p No hay imágenes todavía en este álbum.
-
+        if esAlbumCompartido
+          p.sin-imagenes #{album.propietario.nombre} aún no ha compartido imágenes contigo o no tienes permisos para verlas.
+        else
+          p.sin-imagenes No hay imágenes todavía en este álbum.
+  .modal-alerta#modalAlerta
+    .modal-alerta-fondo
+    .modal-alerta-contenido
+      .modal-alerta-header
+        h3.modal-alerta-titulo Mensaje
+        button.modal-alerta-cerrar(onclick="cerrarModalAlerta()") ×
+      .modal-alerta-body
+        p#modalAlertaMensaje
+      .modal-alerta-footer
+        button.modal-alerta-btn-ok(onclick="cerrarModalAlerta()") Aceptar
   script(src="/album.js")
   script(src="/reacciones.js")
+  script(src="/modal-alerta.js")

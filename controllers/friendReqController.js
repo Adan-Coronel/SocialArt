@@ -4,7 +4,7 @@ const { enviarNotificacionEnTiempoReal } = require("./notificacionesRealTime")
 
 const crearAlbumCompartido = async (ownerId, viewerId) => {
   try {
-    const { SharedAlbum, Album, User } = require("../models/indexModel")
+    const { SharedAlbum, Album, User, Image, ImageVisibility } = require("../models/indexModel")
 
     const albumExistente = await SharedAlbum.findOne({
       where: {
@@ -38,6 +38,32 @@ const crearAlbumCompartido = async (ownerId, viewerId) => {
       album_id: nuevoAlbum.idAlbum,
     })
 
+    const imagenesDelPropietario = await Image.findAll({
+      include: [
+        {
+          model: Album,
+          where: {
+            user_id: ownerId,
+          },
+          include: [
+            {
+              model: SharedAlbum,
+              required: false,
+            },
+          ],
+        },
+      ],
+      where: {
+        "$Album.SharedAlbums.album_id$": null,
+      },
+    })
+    for (const imagen of imagenesDelPropietario) {
+      await ImageVisibility.create({
+        image_id: imagen.idImage,
+        user_id: viewerId,
+        can_view: true,
+      })
+    }
     return nuevoAlbum
   } catch (err) {
     console.error("Error al crear álbum compartido:", err)
@@ -262,6 +288,27 @@ const dejarDeSeguir = async (req, res) => {
       return res.status(404).json({ error: "No sigues a este usuario" })
     }
 
+    const { SharedAlbum, Album, ImageVisibility } = require("../models/indexModel")
+
+    const albumCompartido = await SharedAlbum.findOne({
+      where: {
+        owner_id: toUser,
+        viewer_id: fromUser,
+      },
+      include: [Album],
+    })
+
+    if (albumCompartido) {
+      await ImageVisibility.destroy({
+        where: { user_id: fromUser },
+      })
+
+      await Album.destroy({
+        where: { idAlbum: albumCompartido.album_id },
+      })
+
+      await albumCompartido.destroy()
+    }
     await solicitud.destroy()
     res.json({
       success: true,
@@ -289,6 +336,28 @@ const cancelarSeguimiento = async (req, res) => {
 
     if (!solicitud) {
       return res.status(404).json({ error: "Este usuario no te sigue" })
+    }
+
+    const { SharedAlbum, Album, ImageVisibility } = require("../models/indexModel")
+
+    const albumCompartido = await SharedAlbum.findOne({
+      where: {
+        owner_id: toUser,
+        viewer_id: fromUser,
+      },
+      include: [Album],
+    })
+
+    if (albumCompartido) {
+      await ImageVisibility.destroy({
+        where: { user_id: fromUser },
+      })
+
+      await Album.destroy({
+        where: { idAlbum: albumCompartido.album_id },
+      })
+
+      await albumCompartido.destroy()
     }
 
     await solicitud.destroy()

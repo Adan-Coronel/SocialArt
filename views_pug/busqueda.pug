@@ -86,7 +86,7 @@ block content
 
                 .album-actions
                   a.btn-ver(href=`/albums/${album.idAlbum}`) Ver álbum
-    else if query
+    else if !resultados.usuarios.length && !resultados.albumes.length && query
       .sin-resultados
         h2 No se encontraron resultados
         p No hay contenido que coincida con "#{query}"

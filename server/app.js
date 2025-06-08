@@ -23,8 +23,10 @@ const reactionRoutes = require("../routes/reactionRoute");
 const tagRoutes = require("../routes/tagRoute");
 const estadisticasRoutes = require("../routes/estadisticasRoute");
 const visibilidadRoutes = require("../routes/visibilidadRoute");
+const seguidoresRoutes = require("../routes/seguidoresRoute");
 
-
+const siguiendoRoutes = require("../routes/siguiendoRoute");
+const apiRoutes = require("../routes/apiRoute");
 //Vistas
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '../views_pug'))
@@ -44,15 +46,14 @@ app.use("/reacciones", reactionRoutes);
 app.use("/tags", tagRoutes);
 app.use("/estadisticas", estadisticasRoutes);
 app.use("/visibilidad", visibilidadRoutes);
+app.use("/seguidores", seguidoresRoutes);
+app.use("/siguiendo", siguiendoRoutes);
+app.use("/api", apiRoutes);
 
-//Error global pruebas de cloudinary
+//Error global
 app.use((err, req, res, next) => {
   console.error('💥 Error capturado por el handler global:', err);
-  // si es un error de multer o cloudinary
-  if (err.name === 'MulterError' || err.http_code) {
-    return res.status(500).send(err.message || JSON.stringify(err));
-  }
-  // cualquier otro error
+
   res.status(500).send(err.message || 'Error interno del servidor');
 });
 

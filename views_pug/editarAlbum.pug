@@ -1,0 +1,141 @@
+extends layout
+
+block content
+  link(rel="stylesheet", href="/editarAlbum.css")
+  .editar-album-container
+    .editar-album-header
+      h1 Editar álbum "#{album.titulo}"
+      .acciones-header
+        a.btn-volver(href=`/albums/${album.idAlbum}`) ← Volver al álbum
+    
+    .editar-album-content
+      .album-info
+        form(action=`/albums/${album.idAlbum}/editar`, method="POST")
+          .form-group
+            label(for="titulo") Título:
+            input#titulo(type="text", name="titulo", value=album.titulo, required)
+          
+          .form-group
+            label(for="is_public") Visibilidad:
+            .radio-group
+              label.radio-label
+                input(type="radio", name="is_public", value="true", checked=album.is_public)
+                span Público (visible para todos)
+              label.radio-label
+                input(type="radio", name="is_public", value="false", checked=!album.is_public)
+                span Privado (solo para seguidores)
+          
+          .form-group
+            label Tags (máximo 5):
+            .tags-selector
+              select#tagsSelect(size="8")
+                // Las opciones se cargarán dinámicamente
+              .tags-seleccionadas
+                p.limite-tags Puedes seleccionar hasta 5 tags
+                .tags-lista#editTagsLista
+                  if album.Tags && album.Tags.length
+                    each tag in album.Tags
+                      .tag-seleccionada(data-tag-id=tag.idTag)
+                        span #{tag.nombreTag}
+                        button.quitar-tag(type="button", onclick=`quitarTag(${tag.idTag})`) ×
+                        input(type="hidden", name="tags", value=tag.idTag)
+          
+          button.btn-guardar(type="submit") Guardar cambios
+      
+      .imagenes-section
+        h2 Imágenes del álbum
+        
+        .subir-imagen
+          h3 Subir nuevas imágenes
+          form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
+            .form-group
+              label(for="imagenes") Seleccionar imágenes:
+              input#imagenes(type="file", name="imagenes", multiple, accept="image/*", required)
+            
+            .form-group
+              label(for="caption") Descripción:
+              input#caption(type="text", name="caption", placeholder="Texto opcional")
+            
+            button.btn-subir(type="submit") Subir imágenes
+        
+        if imagenes && imagenes.length
+          .imagenes-grid
+            each imagen in imagenes
+              .imagen-item
+                .imagen-preview
+                  img(src=imagen.url, alt=imagen.caption || "Imagen del álbum")
+                
+                .imagen-info
+                  if imagen.caption
+                    p.caption #{imagen.caption}
+                  
+                  form(action=`/albums/imagenes/${imagen.idImage}/eliminar`, method="POST", onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta imagen?')")
+                    button.btn-eliminar(type="submit") Eliminar imagen
+        else
+          .sin-imagenes
+            p Este álbum aún no tiene imágenes.
+
+  script.
+    let tagsDisponibles = [];
+    
+    async function cargarTags() {
+      try {
+        const response = await fetch('/tags/api/todas');
+        const data = await response.json();
+        
+        if (data.success) {
+          tagsDisponibles = data.tags;
+          mostrarTagsEnSelect();
+        }
+      } catch (err) {
+        console.error('Error al cargar tags:', err);
+      }
+    }
+    
+    function mostrarTagsEnSelect() {
+      const select = document.getElementById('tagsSelect');
+      select.innerHTML = '';
+      
+      tagsDisponibles.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag.idTag;
+        option.textContent = tag.nombreTag;
+        option.onclick = () => agregarTag(tag);
+        select.appendChild(option);
+      });
+    }
+    
+    function agregarTag(tag) {
+      const contenedor = document.getElementById('editTagsLista');
+      
+      const tagsActuales = contenedor.querySelectorAll('.tag-seleccionada');
+      if (tagsActuales.length >= 5) {
+        alert('Solo puedes seleccionar hasta 5 tags');
+        return;
+      }
+      
+      if (contenedor.querySelector(`[data-tag-id="${tag.idTag}"]`)) {
+        return;
+      }
+      
+      const tagElement = document.createElement('div');
+      tagElement.className = 'tag-seleccionada';
+      tagElement.setAttribute('data-tag-id', tag.idTag);
+      tagElement.innerHTML = `
+        <span>${tag.nombreTag}</span>
+        <button type="button" onclick="quitarTag(${tag.idTag})" class="quitar-tag">×</button>
+        <input type="hidden" name="tags" value="${tag.idTag}">
+      `;
+      
+      contenedor.appendChild(tagElement);
+    }
+    
+    function quitarTag(tagId) {
+      const contenedor = document.getElementById('editTagsLista');
+      const tagElement = contenedor.querySelector(`[data-tag-id="${tagId}"]`);
+      if (tagElement) {
+        tagElement.remove();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarTags);

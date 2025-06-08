@@ -5,6 +5,22 @@ require('dotenv').config();
 const registrarUsuario = async (req, res) => {
     const { nombreUsuario, usuarioMail, usuarioContraseña, vUsuarioContraseña } = req.body;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(usuarioMail)) {
+        return res.render("index", {
+            errorRegistro: "El email debe tener un formato válido (ejemplo@dominio.com)",
+            errorLogin: null,
+        })
+    }
+
+
+    const nombreRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
+    if (!nombreRegex.test(nombreUsuario)) {
+        return res.render("index", {
+            errorRegistro: "El nombre solo puede contener letras y espacios",
+            errorLogin: null,
+        })
+    }
     if (usuarioContraseña !== vUsuarioContraseña) {
         return res.render('index', {
             errorRegistro: 'Las contraseñas no coinciden',
@@ -22,13 +38,14 @@ const registrarUsuario = async (req, res) => {
         }
 
         const hashed = await bcrypt.hash(usuarioContraseña, 10);
-        await User.create({
+        const nuevoUsuario = await User.create({
             nombre: nombreUsuario,
             email: usuarioMail,
             pwd_hash: hashed
         });
-
-        res.redirect('/');
+        const token = jwt.sign({ id: nuevoUsuario.idUser }, process.env.JWT_SECRET, { expiresIn: "1h" })
+        res.cookie("token", token, { httpOnly: true })
+        res.redirect('/muro');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error interno');
@@ -41,6 +58,13 @@ const loginUsuario = async (req, res) => {
     try {
         const user = await User.findOne({ where: { email: usuarioMail } });
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(usuarioMail)) {
+            return res.render("index", {
+                errorLogin: "El email debe tener un formato válido",
+                errorRegistro: null,
+            })
+        }
         if (!user) {
             return res.render('index', {
                 errorLogin: 'Usuario no encontrado',

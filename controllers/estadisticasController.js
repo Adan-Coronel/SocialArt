@@ -1,50 +1,69 @@
-const { User, Album, Image, Comment, Reaction } = require("../models/indexModel")
+const { User, Album, Image, Comment, Reaction, SharedAlbum } = require("../models/indexModel")
 const { Op } = require("sequelize");
 const sequelize = require("../config/db");
 const obtenerEstadisticasPerfil = async (req, res) => {
   try {
     const userId = req.user.idUser
+    const [albumesResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM albums a 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL
+    `,
+      {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    )
+    const totalAlbumes = albumesResult.count
 
-    const totalAlbumes = await Album.count({
-      where: { user_id: userId },
-    })
+    const [imagenesResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM imagenes i 
+      INNER JOIN albums a ON i.album_id = a.idAlbum 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL
+    `,
+      {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    )
+    const totalImagenes = imagenesResult.count
 
-    const totalImagenes = await Image.count({
-      include: [
-        {
-          model: Album,
-          where: { user_id: userId },
-        },
-      ],
-    })
+    const [comentariosResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM comments c 
+      INNER JOIN imagenes i ON c.image_id = i.idImage 
+      INNER JOIN albums a ON i.album_id = a.idAlbum 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL
+    `,
+      {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT,
+      },
+      )
+    const totalComentariosRecibidos = comentariosResult.count
 
-    const totalComentariosRecibidos = await Comment.count({
-      include: [
-        {
-          model: Image,
-          include: [
-            {
-              model: Album,
-              where: { user_id: userId },
-            },
-          ],
-        },
-      ],
-    })
-
-    const totalReaccionesRecibidas = await Reaction.count({
-      include: [
-        {
-          model: Image,
-          include: [
-            {
-              model: Album,
-              where: { user_id: userId },
-            },
-          ],
-        },
-      ],
-    })
+    const [reaccionesResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM reactions r 
+      INNER JOIN imagenes i ON r.image_id = i.idImage 
+      INNER JOIN albums a ON i.album_id = a.idAlbum 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL
+    `,
+      {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    )
+    const totalReaccionesRecibidas = reaccionesResult.count
 
     let albumMasPopular = null
     try {
@@ -57,7 +76,8 @@ const obtenerEstadisticasPerfil = async (req, res) => {
         FROM albums a
         LEFT JOIN imagenes i ON a.idAlbum = i.album_id
         LEFT JOIN reactions r ON i.idImage = r.image_id
-        WHERE a.user_id = :userId
+        LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id
+        WHERE a.user_id = :userId AND sa.album_id IS NULL
         GROUP BY a.idAlbum, a.titulo
         HAVING COUNT(r.idReaction) > 0
         ORDER BY totalReacciones DESC
@@ -74,57 +94,61 @@ const obtenerEstadisticasPerfil = async (req, res) => {
       }
     } catch (albumError) {
       console.error("Error al obtener álbum más popular:", albumError)
-      
+
     }
     const fechaLimite = new Date()
     fechaLimite.setDate(fechaLimite.getDate() - 30)
+    const fechaLimiteStr = fechaLimite.toISOString().slice(0, 19).replace("T", " ")
+
+    const [imagenesRecientesResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM imagenes i 
+      INNER JOIN albums a ON i.album_id = a.idAlbum 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL AND i.created_at >= :fechaLimite
+    `,
+      {
+        replacements: { userId, fechaLimite: fechaLimiteStr },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    )
+
+    const [comentariosRecientesResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM comments c 
+      INNER JOIN imagenes i ON c.image_id = i.idImage 
+      INNER JOIN albums a ON i.album_id = a.idAlbum 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL AND c.created_at >= :fechaLimite
+    `,
+      {
+        replacements: { userId, fechaLimite: fechaLimiteStr },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    )
+
+    const [reaccionesRecientesResult] = await sequelize.query(
+      `
+      SELECT COUNT(*) as count 
+      FROM reactions r 
+      INNER JOIN imagenes i ON r.image_id = i.idImage 
+      INNER JOIN albums a ON i.album_id = a.idAlbum 
+      LEFT JOIN shared_albums sa ON a.idAlbum = sa.album_id 
+      WHERE a.user_id = :userId AND sa.album_id IS NULL AND r.created_at >= :fechaLimite
+    `,
+      {
+        replacements: { userId, fechaLimite: fechaLimiteStr },
+        type: sequelize.QueryTypes.SELECT,
+      },
+    )
 
     const actividadReciente = {
-      imagenesSubidas: await Image.count({
-        include: [
-          {
-            model: Album,
-            where: { user_id: userId },
-          },
-        ],
-        where: {
-          created_at: { [Op.gte]: fechaLimite },
-        },
-      }),
-      comentariosRecibidos: await Comment.count({
-        include: [
-          {
-            model: Image,
-            include: [
-              {
-                model: Album,
-                where: { user_id: userId },
-              },
-            ],
-          },
-        ],
-        where: {
-          created_at: { [Op.gte]: fechaLimite },
-        },
-      }),
-      reaccionesRecibidas: await Reaction.count({
-        include: [
-          {
-            model: Image,
-            include: [
-              {
-                model: Album,
-                where: { user_id: userId },
-              },
-            ],
-          },
-        ],
-        where: {
-          created_at: { [Op.gte]: fechaLimite },
-        },
-      }),
+      imagenesSubidas: imagenesRecientesResult.count,
+      comentariosRecibidos: comentariosRecientesResult.count,
+      reaccionesRecibidas: reaccionesRecientesResult.count,
     }
-
     const estadisticas = {
       totalAlbumes,
       totalImagenes,

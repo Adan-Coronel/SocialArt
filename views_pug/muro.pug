@@ -18,12 +18,15 @@ block content
             .album-header
               .usuario-info 
                 if album.propietario && album.propietario.foto
-                  img.avatar(src=album.propietario.foto, width="40")
+                  a(href=`/perfil/${album.propietario.idUser}`)
+                    img.avatar(src=album.propietario.foto, width="40")
                 else if album.propietario
-                  .avatar-placeholder #{album.propietario.nombre.charAt(0)}
+                  a(href=`/perfil/${album.propietario.idUser}`)
+                    .avatar-placeholder #{album.propietario.nombre.charAt(0)}
                 .usuario-datos
                   if album.propietario
-                    h3 #{album.propietario.nombre}
+                    h3 
+                      a(href=`/perfil/${album.propietario.idUser}` style="text-decoration: none; color: inherit;") #{album.propietario.nombre}
                   small #{new Date(album.created_at).toLocaleDateString()}
 
             .album-content

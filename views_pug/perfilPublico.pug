@@ -16,6 +16,9 @@ block content
             p.intereses Intereses: #{usuario.intereses}
           
           if usuarioLogueado
+            .seguidores-info
+              a.seguidores-link(href=`/seguidores/${usuario.idUser}`) Ver seguidores
+              a.seguidores-link(href=`/siguiendo/${usuario.idUser}`) Ver siguiendo
             .estados-relacion
               if estadosRelacion.yoLoSigo
                 .estado-seguimiento

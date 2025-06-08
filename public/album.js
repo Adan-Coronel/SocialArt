@@ -1,14 +1,11 @@
+
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("Cargando página del álbum...");
 
   const usuarioLogueado = document.body.getAttribute("data-usuario-logueado")
-  console.log("Usuario logueado:", usuarioLogueado)
 
   const imagenes = document.querySelectorAll(".imagen-item")
-  console.log(`Encontradas ${imagenes.length} imágenes`)
   imagenes.forEach((item) => {
     const imageId = item.getAttribute("data-image-id");
-    console.log(`Procesando imagen ID: ${imageId}`)
     if (imageId) {cargarComentarios(imageId)
     }
   })
@@ -16,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function getImageIdFromElement(element) {
   const imageId = element.getAttribute("data-image-id")
-  console.log(`ID del elemento:`, imageId)
   return imageId
 }
 function mostrarMensajeInvitado(imageId) {
@@ -27,7 +23,6 @@ function mostrarMensajeInvitado(imageId) {
   }
 }
 async function enviarComentario(imageId) {
-  console.log(`Enviando comentario para imagen ${imageId}`)
   const form = event.target.closest(".comentario-form")
   const input = form.querySelector(".comentario-input")
   const texto = input.value.trim()
@@ -38,7 +33,6 @@ async function enviarComentario(imageId) {
   }
 
   try {
-    console.log("Enviando comentario:", texto, "para imagen:", imageId)
     const response = await fetch(`/comentarios/imagen/${imageId}`, {
       method: "POST",
       headers: {
@@ -47,10 +41,8 @@ async function enviarComentario(imageId) {
       body: JSON.stringify({ texto: texto }),
     })
     const data = await response.json()
-    console.log("Respuesta del servidor:", data)
     if (response.ok && data.success) {
       input.value = ""
-      console.log("Comentario enviado exitosamente, recargando comentarios...")
       await cargarComentarios(imageId)
     } else {
       console.error("Error en la respuesta:", data)
@@ -63,12 +55,10 @@ async function enviarComentario(imageId) {
 }
 
 async function cargarComentarios(imageId) {
-  console.log(`Cargando comentarios para imagen ${imageId}`)
   try {
     const response = await fetch(`/comentarios/imagen/${imageId}`)
     const data = await response.json()
 
-    console.log('Datss de comentarios recibidos:', data)
     if (data.success) {
       mostrarComentarios(imageId, data.comentarios)
     } else {
@@ -80,7 +70,6 @@ async function cargarComentarios(imageId) {
 }
 
 function mostrarComentarios(imageId, comentarios) {
-  console.log(`Mostrando ${comentarios.length} comentarios para imagen ${imageId}`)
   const container = document.getElementById(`comentarios-${imageId}`)
   if (!container) {
     console.error(` No se encontró el contenedor comentarios-${imageId}`)
@@ -103,5 +92,4 @@ function mostrarComentarios(imageId, comentarios) {
     )
     .join("")
   container.innerHTML = comentariosHTML
-  console.log(`Comentariosmostradrs exitosamente`)
 }
