@@ -28,7 +28,7 @@ const configurarVisibilidadImagen = async (req, res) => {
       where: { image_id: imageId },
     })
 
- 
+
     if (usuariosPermitidos && Array.isArray(usuariosPermitidos) && usuariosPermitidos.length > 0) {
       const configuraciones = usuariosPermitidos.map((usuarioId) => ({
         image_id: imageId,
@@ -37,13 +37,13 @@ const configurarVisibilidadImagen = async (req, res) => {
       }))
 
       await ImageVisibility.bulkCreate(configuraciones)
-   } else {
+    } else {
       await ImageVisibility.create({
         image_id: imageId,
         user_id: userId,
         can_view: false,
       })
-     }
+    }
     res.json({
       success: true,
       message: "Visibilidad configurada correctamente",
@@ -87,14 +87,14 @@ const obtenerConfiguracionVisibilidad = async (req, res) => {
     const marcadorNadie = await ImageVisibility.findOne({
       where: {
         image_id: imageId,
-        user_id:imagen.Album.user_id,
+        user_id: userId,
         can_view: false
       },
     })
 
 
     const usuariosPermitidos = configuracion.map((config) => config.user_id)
-     res.json({
+    res.json({
       success: true,
       usuariosPermitidos,
       esPublico: false,
@@ -170,6 +170,10 @@ const verConfiguracionVisibilidad = async (req, res) => {
             },
           ],
         },
+        {
+          model: SharedAlbum,
+          required: false,
+        }
       ],
     })
 
@@ -182,6 +186,17 @@ const verConfiguracionVisibilidad = async (req, res) => {
         usuarioLogueado: req.user,
       })
     }
+    const esAlbumCompartido = album.SharedAlbums && album.SharedAlbums.length > 0
+    if (esAlbumCompartido) {
+      return res.status(403).render("error", {
+        titulo: "Configuración no disponible",
+        mensaje: "No puedes configurar visibilidad en álbumes compartidos.",
+        botonTexto: "Volver al perfil",
+        botonUrl: "/perfil",
+        usuarioLogueado: req.user,
+      })
+    }
+
     if (album.is_public) {
       return res.status(400).render("error", {
         titulo: "Configuración no disponible",
@@ -237,18 +252,22 @@ const verificarVisibilidadImagen = async (imageId, userId) => {
     const marcadorNadie = await ImageVisibility.findOne({
       where: {
         image_id: imageId,
-        user_id: 0,
+        user_id: imagen.Album.user_id,
+        can_view: false
       },
     })
     if (marcadorNadie) {
       return false
     }
 
-    const configuracionesVisibilidad = await ImageVisibility.findAll({
-      where: { image_id: imageId, can_view: false }
+    const configuracionesPermitidas = await ImageVisibility.findAll({
+      where: {
+        image_id: imageId,
+        can_view: true,
+      },
     })
 
-    if (configuracionesVisibilidad.length === 0) {
+    if (configuracionesPermitidas.length === 0) {
 
       const esSeguidor = await FriendRequest.findOne({
         where: {
@@ -261,7 +280,7 @@ const verificarVisibilidadImagen = async (imageId, userId) => {
     }
 
 
-    const puedeVer = configuracionesVisibilidad.some((config) => config.user_id === userId && config.can_view)
+    const puedeVer = configuracionesPermitidas.some((config) => config.user_id === userId)
 
     return puedeVer
   } catch (err) {
@@ -306,7 +325,7 @@ const configurarVisibilidadPorDefecto = async (propietarioId, seguidorId) => {
         continue
       }
       const configuracionesExistentes = await ImageVisibility.findAll({
-        where: { image_id: imagen.idImage, can_view: false }
+        where: { image_id: imagen.idImage, can_view: true }
       })
 
       if (configuracionesExistentes.length === 0) {
@@ -326,7 +345,7 @@ const configurarVisibilidadPorDefecto = async (propietarioId, seguidorId) => {
             user_id: seguidorId,
             can_view: true,
           })
-        } 
+        }
       }
     }
     return true

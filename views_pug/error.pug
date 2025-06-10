@@ -1,8 +1,10 @@
 extends layout
 
 block content
+  link(rel="stylesheet", href="/error.css")
   .error-container
     .error-card
+      .error-icon
       h1.error-title #{titulo || 'Error'}
       .error-message
         p #{mensaje || 'Ha ocurrido un error inesperado.'}
@@ -26,6 +28,11 @@ block content
       text-align: center;
       max-width: 600px;
       width: 100%;
+    }
+    .error-icon {
+      font-size: 3rem;
+      color: #dc3545;
+      margin-bottom: 1rem;
     }
     
     .error-title {

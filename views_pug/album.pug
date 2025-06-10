@@ -23,7 +23,7 @@ block content
     if usuarioLogueado && album.user_id === usuarioLogueado.idUser && !esAlbumCompartido
       .album-actions
         a.btn-editar(href=`/albums/${album.idAlbum}/editar`) ✏️ Editar álbum
-    if !album.is_public
+      if !album.is_public
           a.btn-visibilidad(href=`/visibilidad/${album.idAlbum}`) 👁️ Configurar visibilidad
     .imagenes-section
       h2 Imágenes

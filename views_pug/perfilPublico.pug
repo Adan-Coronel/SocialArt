@@ -19,42 +19,45 @@ block content
             .seguidores-info
               a.seguidores-link(href=`/seguidores/${usuario.idUser}`) Ver seguidores
               a.seguidores-link(href=`/siguiendo/${usuario.idUser}`) Ver siguiendo
-            .estados-relacion
+            
+    if usuarioLogueado
+      .panel-relaciones
+        .estados-relacion
+          if estadosRelacion.yoLoSigo || estadosRelacion.elMeSigue
+            .badges-estado
               if estadosRelacion.yoLoSigo
-                .estado-seguimiento
-                  span.badge-siguiendo ✅ Lo sigues
-              
+                span.badge-siguiendo ✅ Lo sigues
               if estadosRelacion.elMeSigue
-                .estado-seguimiento
-                  span.badge-seguidor 👥 Te sigue
-              if estadosRelacion.solicitudRecibida
-                .solicitud-recibida
-                  .alerta-solicitud
-                    p.mensaje-solicitud 📩 #{usuario.nombre} te envió una solicitud de amistad
-                    .acciones-solicitud
-                      button.btn-aceptar(onclick="irASolicitudes()") Ver notificaciones
-              .acciones-perfil
-                if !estadosRelacion.yoLoSigo && !estadosRelacion.solicitudEnviada
-                  button.btn-solicitud(onclick=`enviarSolicitud(${usuario.idUser})`) 
-                    | 📤 Seguir
-                else if estadosRelacion.solicitudEnviada
-                  button.btn-solicitud-enviada(onclick=`cancelarSolicitud(${usuario.idUser})`)
-                    | ⏳ Solicitud enviada (cancelar)
-                else if estadosRelacion.yoLoSigo
-                  button.btn-dejar-seguir(onclick=`dejarDeSeguir(${usuario.idUser})`)
-                    | ❌ Dejar de seguir
-                if estadosRelacion.elMeSigue
-                  button.btn-cancelar-seguimiento(onclick=`cancelarSeguimiento(${usuario.idUser})`)
-                    | 🚫 Cancelar que me siga
-          else
-            p.invitado-mensaje Inicia sesión para seguir a este usuario
+                span.badge-seguidor 👥 Te sigue
+          if estadosRelacion.solicitudRecibida
+            .solicitud-recibida
+              .alerta-solicitud
+                p.mensaje-solicitud 📩 #{usuario.nombre} te envió una solicitud de amistad
+                .acciones-solicitud
+                  button.btn-aceptar(onclick="irASolicitudes()") Ver notificaciones
+        .acciones-perfil
+          if !estadosRelacion.yoLoSigo && !estadosRelacion.solicitudEnviada
+            button.btn-solicitud(onclick=`enviarSolicitud(${usuario.idUser})`) 
+              | Seguir
+          else if estadosRelacion.solicitudEnviada
+            button.btn-solicitud-enviada(onclick=`cancelarSolicitud(${usuario.idUser})`)
+              | Solicitud enviada (cancelar)
+          else if estadosRelacion.yoLoSigo
+            button.btn-dejar-seguir(onclick=`dejarDeSeguir(${usuario.idUser})`)
+              | Dejar de seguir
+          if estadosRelacion.elMeSigue
+            button.btn-cancelar-seguimiento(onclick=`cancelarSeguimiento(${usuario.idUser})`)
+              | Cancelar que me siga
+    else
+      .invitado-mensaje 
+        p Inicia sesión para seguir a este usuario y ver más contenido
 
     .perfil-content
       h2 Álbumes
-      if estadosRelacion && estadosRelacion.yoLoSigo
+      if  estadosRelacion && estadosRelacion.yoLoSigo
         p.info-seguidor Como sigues a este usuario, puedes ver todos sus álbumes
       else
-        p.info-publicos Solo álbumes públicos
+        p.info-publicos Solo álbumes públicos disponibles
       if usuario.albums && usuario.albums.length > 0
         .albumes-grid
           each album in usuario.albums

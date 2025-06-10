@@ -4,15 +4,17 @@ html(lang="es")
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title SocialArt | Red social para artesanos
-    link(rel="stylesheet", href="/login.css") 
-    link(rel="stylesheet", href="/perfil.css")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;500;600;700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="/cozy-system.css")
+    link(rel="stylesheet", href="/layout.css")
     link(rel='stylesheet', href='/notificaciones.css')
     link(rel='stylesheet', href='/notificacionEmrg.css')
     script(src="/socket.io/socket.io.js")
   body
     header
       nav.navbar
-
         ul.nav-left
           if typeof usuarioLogueado !== 'undefined' && usuarioLogueado
             li: a(href="/muro") Inicio
@@ -22,46 +24,34 @@ html(lang="es")
                   img.nav-avatar(src=usuarioLogueado.foto, width="25", height="25")
                 | Mi perfil
             li: a(href="/estadisticas") Estadísticas
-            li.seguidores-dropdown
-              a.seguidores-toggle(href="#") Amistades
-              .seguidores-menu
-                .seguidores-menu-header
-                  h3 Mis amistades
-                .seguidores-menu-content
-                  .seguidores-tabs
-                    button.tab-btn.active(onclick="mostrarTab('seguidores')") Seguidores
-                    button.tab-btn(onclick="mostrarTab('siguiendo')") Siguiendo
-                  .tab-content#seguidores-tab
-                    .cargando-seguidores Cargando seguidores...
-                  .tab-content#siguiendo-tab.hidden
-                    .cargando-siguiendo Cargando siguiendo...
           else
-            li: a(href="/", onclick="abrirModalLogin()") Iniciar Sesión
+            li: a(href="/", onclick="abrirModalLogin()") 🔑 Iniciar Sesión
+        
         ul.nav-right
           li
-            form(action="/busqueda", method="GET", style="display:inline;")
-              input(type="text", name="q", placeholder="Buscar por usuarios, álbumes")
-              select(name="tipo")
+            form.search-form(action="/busqueda", method="GET")
+              input.search-input(type="text", name="q", placeholder="Buscar...")
+              select.search-select(name="tipo")
                 option(value="todo") Todo
                 option(value="usuarios") Usuarios
                 option(value="albumes") Álbumes
                 option(value="tags") Tags
-              button(type="submit") Buscar
+              button.search-btn(type="submit") 🔍
           if typeof usuarioLogueado !== 'undefined' && usuarioLogueado
             li
               .notificaciones-container
                 button.notificaciones-btn(onclick="notificaciones.togglePanel()")
                   | 🔔
                   .notificaciones-badge 0
-            li: a(href="/logout") Cerrar sesión
+            li: a.logout-btn(href="/logout") 🚪 Cerrar sesión
           else
-            li: a(href="/#registro") Registrarse
+            li: a.register-btn(href="/#registro") ✨ Registrarse
 
     main
       block content
 
     footer
-      p © 2025 SocialArt. Adan Coronel .
+      p © 2025 SocialArt, un refugio para artistas. Hecho por Adan Coronel.
     .modal-alerta#modalAlerta
       .modal-alerta-fondo
       .modal-alerta-contenido
@@ -90,239 +80,3 @@ html(lang="es")
             abrirModal('loginModal');
           }
         }
-  style.
-    .nav-avatar {
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 0.5rem;
-      vertical-align: middle;
-    }
-    .modal-alerta {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 2000;
-    }
-    
-    .modal-alerta.show {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .modal-alerta-fondo {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    
-    .modal-alerta-contenido {
-      position: relative;
-      background: white;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      z-index: 2001;
-    }
-    
-    .modal-alerta-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .modal-alerta-titulo {
-      margin: 0;
-      font-size: 1.2rem;
-      color: #333;
-    }
-    
-    .modal-alerta-cerrar {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #999;
-      transition: color 0.2s ease;
-    }
-    
-    .modal-alerta-cerrar:hover {
-      color: #333;
-    }
-    
-    .modal-alerta-body {
-      padding: 1.5rem;
-    }
-    
-    .modal-alerta-footer {
-      padding: 1rem;
-      text-align: right;
-      border-top: 1px solid #eee;
-    }
-    
-    .modal-alerta-btn-ok {
-      background: #4a90e2;
-      color: white;
-      border: none;
-      padding: 0.5rem 1.5rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    
-    .modal-alerta-btn-ok:hover {
-      background: #3a7bc8;
-    }
-    
-    /* Estilos para el menú desplegable de seguidores */
-    .seguidores-dropdown {
-      position: relative;
-    }
-    
-    .seguidores-toggle {
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-    
-    .seguidores-toggle::after {
-      content: '▼';
-      font-size: 0.7rem;
-      margin-left: 0.5rem;
-    }
-    
-    .seguidores-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      width: 320px;
-      z-index: 1000;
-      overflow: hidden;
-    }
-    
-    .seguidores-dropdown:hover .seguidores-menu {
-      display: block;
-    }
-    
-    .seguidores-menu-header {
-      padding: 1rem;
-      border-bottom: 1px solid #eee;
-      background: #f8f9fa;
-    }
-    
-    .seguidores-menu-header h3 {
-      margin: 0;
-      font-size: 1rem;
-      color: #333;
-    }
-    
-    .seguidores-menu-content {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    
-    .seguidores-tabs {
-      display: flex;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .tab-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      padding: 0.75rem;
-      cursor: pointer;
-      font-weight: 500;
-      color: #666;
-      transition: all 0.2s ease;
-    }
-    
-    .tab-btn.active {
-      color: #4a90e2;
-      border-bottom: 2px solid #4a90e2;
-    }
-    
-    .tab-content {
-      padding: 1rem;
-    }
-    
-    .tab-content.hidden {
-      display: none;
-    }
-    
-    .cargando-seguidores,
-    .cargando-siguiendo {
-      text-align: center;
-      color: #666;
-      padding: 1rem;
-    }
-    
-    .seguidor-item,
-    .siguiendo-item {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background-color 0.2s ease;
-    }
-    
-    .seguidor-item:hover,
-    .siguiendo-item:hover {
-      background-color: #f8f9fa;
-    }
-    
-    .seguidor-avatar,
-    .siguiendo-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 1rem;
-    }
-    
-    .seguidor-avatar-placeholder,
-    .siguiendo-avatar-placeholder {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #4a90e2;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 1rem;
-    }
-    
-    .seguidor-info,
-    .siguiendo-info {
-      flex: 1;
-    }
-    
-    .seguidor-nombre,
-    .siguiendo-nombre {
-      font-weight: 500;
-      color: #333;
-      margin: 0;
-      font-size: 0.9rem;
-    }
-    
-    .sin-seguidores,
-    .sin-siguiendo {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: #666;
-    }

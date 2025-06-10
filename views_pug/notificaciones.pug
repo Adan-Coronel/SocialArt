@@ -1,43 +1,44 @@
 extends layout
 
 block content
-  link(rel="stylesheet", href="/notificaciones.css")
+  link(rel="stylesheet", href="/notificaciones-page.css")
   
   .notificaciones-container
     .notificaciones-header
       h1 Todas las Notificaciones
-      a.volver-btn(href="javascript:history.back()") ← Volver
+      a.volver-btn(href="javascript:history.back()") Volver
 
     if notificaciones.length
-      each notificacion in notificaciones
-        .notificacion-card(class=notificacion.leido ? 'leida' : 'no-leida')
-          .notificacion-usuario-info
-            if notificacion.emisor.foto
-              img.notificacion-avatar(src=notificacion.emisor.foto, alt=notificacion.emisor.nombre)
-            else
-              .notificacion-avatar-placeholder #{notificacion.emisor.nombre.charAt(0)}
+      .notificaciones-list
+        each notificacion in notificaciones
+          .notificacion-card(class=notificacion.leido ? 'leida' : 'no-leida')
+            .notificacion-usuario-info
+              if notificacion.emisor.foto
+                img.notificacion-avatar(src=notificacion.emisor.foto, alt=notificacion.emisor.nombre)
+              else
+                .notificacion-avatar-placeholder #{notificacion.emisor.nombre.charAt(0)}
+              
+              .notificacion-datos
+                .notificacion-contenido
+                  strong= notificacion.emisor.nombre
+                  span  #{notificacion.mensaje}
+                small.notificacion-tiempo #{new Date(notificacion.created_at).toLocaleDateString()} a las #{new Date(notificacion.created_at).toLocaleTimeString()}
             
-            .notificacion-datos
-              .notificacion-contenido
-                strong= notificacion.emisor.nombre
-                span  #{notificacion.mensaje}
-              small.notificacion-tiempo #{new Date(notificacion.created_at).toLocaleDateString()} a las #{new Date(notificacion.created_at).toLocaleTimeString()}
-          
-          .notificacion-acciones
-            if notificacion.tipo === 'solicitud_amistad' && !notificacion.leido
-              button.btn-aceptar(onclick=`manejarAccion(${notificacion.idNotification}, 'aceptar')`) Aceptar
-              button.btn-rechazar(onclick=`manejarAccion(${notificacion.idNotification}, 'rechazar')`) Rechazar
-            else if notificacion.tipo === 'comentario'
-              a.btn-ver(href=`/comentarios/info/${notificacion.ref_id}`) Ver comentario
-              button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
-            else if notificacion.tipo === 'solicitud_aceptada'
-              a.btn-ver(href=`/perfil/${notificacion.emisor.idUser}`) Ver perfil
-              button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
-            else if notificacion.tipo === 'reaccion'
-              a.btn-ver(onclick=`irAImagenDesdeReaccion(${notificacion.ref_id}), ${notificacion.idNotification})`) Ver imagen
-              button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
-            else
-              span.accion-completada ✓ Procesada
+            .notificacion-acciones
+              if notificacion.tipo === 'solicitud_amistad' && !notificacion.leido
+                button.btn-aceptar(onclick=`manejarAccion(${notificacion.idNotification}, 'aceptar')`) Aceptar
+                button.btn-rechazar(onclick=`manejarAccion(${notificacion.idNotification}, 'rechazar')`) Rechazar
+              else if notificacion.tipo === 'comentario'
+                a.btn-ver(href=`/comentarios/info/${notificacion.ref_id}`) Ver comentario
+                button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
+              else if notificacion.tipo === 'solicitud_aceptada'
+                a.btn-ver(href=`/perfil/${notificacion.emisor.idUser}`) Ver perfil
+                button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
+              else if notificacion.tipo === 'reaccion'
+                a.btn-ver(onclick=`irAImagenDesdeReaccion(${notificacion.ref_id}), ${notificacion.idNotification})`) Ver imagen
+                button.btn-marcar-leida(onclick=`marcarComoLeida(${notificacion.idNotification})`) ✓ Marcar leída
+              else
+                span.accion-completada ✓ Procesada
     else
       .sin-notificaciones
         h2 No tienes notificaciones

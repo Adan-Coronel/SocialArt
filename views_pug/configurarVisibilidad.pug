@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  link(rel="stylesheet", href="/perfil.css")
+  link(rel="stylesheet", href="/configurar.css")
   .visibilidad-container
     .visibilidad-header
       h1 Configurar Visibilidad - #{album.titulo}
@@ -11,20 +11,20 @@ block content
       p Este álbum es <strong>privado</strong>. Puedes controlar qué seguidores pueden ver cada imagen.
       p.nota-publica Si cambias el álbum a público, todas las imágenes serán visibles para todos los usuarios.
     if album.Images && album.Images.length
-      each imagen in album.Images
-        .imagen-config
-          .imagen-preview
-            img(src=imagen.url, width="200")
-            if imagen.caption
-              p.caption= imagen.caption
-          
-          .visibilidad-controls
-            h4 ¿Quién puede ver esta imagen?
-            .seguidores-list(id=`seguidores-${imagen.idImage}`)
-              p Cargando seguidores...
+      .imagenes-grid
+        each imagen in album.Images
+          .imagen-config
+            .imagen-preview
+              img(src=imagen.url, width="200")
+              if imagen.caption
+                p.caption= imagen.caption
             
-            button.btn-guardar(onclick=`guardarVisibilidad(${imagen.idImage})`) 
-              Guardar Guardar cambios
+            .visibilidad-controls
+              h4 ¿Quién puede ver esta imagen?
+              .seguidores-list(id=`seguidores-${imagen.idImage}`)
+                p Cargando seguidores...
+              
+              button.btn-guardar(onclick=`guardarVisibilidad(${imagen.idImage})`)  Guardar cambios
     else
       .sin-imagenes
         p Este álbum no tiene imágenes aún.
@@ -55,6 +55,24 @@ block content
       });
     }
 
+    async function cargarConfiguracionExistente(imageId) {
+      try {
+        const response = await fetch(`/visibilidad/imagen/${imageId}/config`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.esPublico) {
+            return { usuariosPermitidos: [], restriccionTotal: false };
+          }
+          return { 
+            usuariosPermitidos: data.usuariosPermitidos || [], 
+            restriccionTotal: data.restriccionTotal || false 
+          };
+        }
+      } catch (err) {
+        console.error('Error al cargar configuración:', err);
+      }
+      return { usuariosPermitidos: [], restriccionTotal: false };
+    }
     function mostrarSeguidores(imageId, seguidores) {
       const container = document.getElementById(`seguidores-${imageId}`);
       const btn = document.querySelector(`button[onclick="guardarVisibilidad(${imageId})"]`);
@@ -66,8 +84,17 @@ block content
       }
 
       cargarConfiguracionExistente(imageId).then(configuracion => {
+        const { usuariosPermitidos, restriccionTotal } = configuracion;
         const html = seguidores.map(seguidor => {
-          const estaPermitido = configuracion.length === 0 || configuracion.includes(seguidor.idUser);
+          let estaPermitido;
+          
+          if (restriccionTotal) {
+            estaPermitido = false;
+          } else if (usuariosPermitidos.length === 0) {
+            estaPermitido = true;
+          } else {
+            estaPermitido = usuariosPermitidos.includes(seguidor.idUser);
+          }
           return `
             <div class="seguidor-item">
               ${seguidor.foto 
@@ -90,22 +117,6 @@ block content
         container.innerHTML = html;
         if (btn) btn.disabled = false;
       });
-    }
-
-    async function cargarConfiguracionExistente(imageId) {
-      try {
-        const response = await fetch(`/visibilidad/imagen/${imageId}/config`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.esPublico) {
-            return [];
-          }
-          return data.usuariosPermitidos || [];
-        }
-      } catch (err) {
-        console.error('Error al cargar configuración:', err);
-      }
-      return [];
     }
     async function guardarVisibilidad(imageId) {
       try {

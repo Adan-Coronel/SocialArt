@@ -47,6 +47,9 @@ block content
         
         .subir-imagen
           h3 Subir nuevas imágenes
+          p.limite-imagenes 
+            strong Nota: 
+            | Máximo 20 imágenes por álbum. Actualmente: #{imagenes ? imagenes.length : 0}/20
           form(action=`/albums/${album.idAlbum}/upload`, method="POST", enctype="multipart/form-data")
             .form-group
               label(for="imagenes") Seleccionar imágenes:
@@ -75,6 +78,18 @@ block content
           .sin-imagenes
             p Este álbum aún no tiene imágenes.
 
+  .modal-alerta#modalAlerta
+    .modal-alerta-fondo
+    .modal-alerta-contenido
+      .modal-alerta-header
+        h3.modal-alerta-titulo Mensaje
+        button.modal-alerta-cerrar(onclick="cerrarModalAlerta()") ×
+      .modal-alerta-body
+        p#modalAlertaMensaje
+      .modal-alerta-footer
+        button.modal-alerta-btn-ok(onclick="cerrarModalAlerta()") Aceptar
+
+  script(src="/modal-alerta.js")
   script.
     let tagsDisponibles = [];
     
@@ -89,6 +104,7 @@ block content
         }
       } catch (err) {
         console.error('Error al cargar tags:', err);
+        mostrarModalAlerta('Error al cargar tags: ' + err.message);
       }
     }
     
@@ -110,7 +126,7 @@ block content
       
       const tagsActuales = contenedor.querySelectorAll('.tag-seleccionada');
       if (tagsActuales.length >= 5) {
-        alert('Solo puedes seleccionar hasta 5 tags');
+        mostrarModalAlerta('Solo puedes seleccionar hasta 5 tags');
         return;
       }
       

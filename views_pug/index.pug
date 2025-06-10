@@ -2,48 +2,156 @@ doctype html
 html(lang="es")
   head
     meta(charset="UTF-8")
-    title SocialArt
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title SocialArt | Tu refugio creativo
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;500;600;700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="/cozy-system.css")
     link(rel="stylesheet", href="/index.css")
     script(src="/modal.js" defer)
   body
-    .contenedor
-      .izquierda
-        h1 SocialArt
+    .cozy-nav
+      .cozy-nav-content
+        a.cozy-logo(href="/")
+          span 🍂
+          | SocialArt
+        
+        nav
+          ul.cozy-nav-links
+            li: a.cozy-nav-link(href="#features") Descubrir
+            li: a.cozy-nav-link(href="#about") Nosotros
+            li: button.cozy-button.cozy-button-secondary(onclick="abrirModal('loginModal')") Entrar
+            li: button.cozy-button.cozy-button-primary(onclick="abrirModal('registroModal')") Crear cuenta
 
-      .derecha
-        button(onclick="abrirModal('loginModal')") Ingresá con tu cuenta
-        button(onclick="abrirModal('registroModal')") ¿Todavía no tenés cuenta? ¡Unite!
-        button(onclick="window.location.href='/muro'") Entrar como invitado
+    main
+      section.cozy-section
+        .cozy-container
+          .hero-content.cozy-fade-in
+            .hero-text
+              h1 Tu refugio creativo en el mundo digital
+              p.hero-subtitle Donde cada imagen cuenta una historia y cada historia encuentra su hogar
+              p.hero-description 
+                | Como las hojas que caen en otoño, cada momento creativo merece ser preservado. 
+                | SocialArt es tu álbum de recuerdos digital, donde puedes compartir tu arte 
+                | con quienes realmente lo valoran.
+              
+              .hero-actions
+                button.cozy-button.cozy-button-primary(onclick="abrirModal('registroModal')")
+                  span 🎨
+                  | Comenzar mi historia
+                button.cozy-button.cozy-button-secondary(onclick="window.location.href='/muro'")
+                  span 👁️
+                  | Explorar como invitado
+            
+            .hero-visual
+              .hero-image-stack
+                .hero-image.hero-image-1
+                .hero-image.hero-image-2
+                .hero-image.hero-image-3
 
+      section#features.cozy-section
+        .cozy-container
+          h2.section-title El lugar donde tu arte respira
+          
+          .cozy-grid.cozy-grid-3
+            .feature-card.cozy-card.cozy-fade-in
+              .feature-icon 📸
+              h3 Álbumes como diarios
+              p Organiza tus creaciones en álbumes temáticos. Cada colección cuenta una parte de tu historia artística.
+            
+            .feature-card.cozy-card.cozy-fade-in
+              .feature-icon 🤝
+              h3 Círculo íntimo
+              p Comparte solo con quienes elijas. Tu arte es personal, y tú decides quién puede verlo y comentarlo.
+            
+            .feature-card.cozy-card.cozy-fade-in
+              .feature-icon 🍃
+              h3 Conversaciones auténticas
+              p Conecta con otros artistas a través de comentarios genuinos y reacciones que realmente importan.
+
+      // About Section
+      section#about.cozy-section
+        .cozy-container
+          .about-content.cozy-grid.cozy-grid-2
+            .about-text
+              h2 Creado por artistas, para artistas
+              p 
+                | Entendemos que tu arte no es solo una imagen, es una extensión de tu alma. 
+                | Por eso creamos un espacio donde cada pixel tiene valor y cada comentario 
+                | viene del corazón.
+              p
+                | No somos una red social más. Somos tu estudio digital, tu galería personal, 
+                | tu refugio creativo en un mundo que va demasiado rápido.
+              
+              button.cozy-button.cozy-button-primary(onclick="abrirModal('registroModal')")
+                | Únete a nuestra comunidad
+            
+            .about-visual
+              .cozy-card
+                .testimonial
+                  p "Finalmente un lugar donde puedo mostrar mi trabajo sin algoritmos que decidan quién lo ve."
+                  .testimonial-author
+                    .cozy-avatar-placeholder(style="width: 40px; height: 40px; font-size: 1rem;") M
+                    span María, ilustradora
+
+    // Modales
     .modal#loginModal
-      .modal-contenido
-        button.cerrar(onclick="cerrarModal('loginModal')") ✖
-        form(action="/login" method="POST" class="formulario")
-          h2 Iniciar sesión
+      .modal-backdrop(onclick="cerrarModal('loginModal')")
+      .modal-content
+        .cozy-card
+          .modal-header
+            h2 Bienvenido de vuelta
+            button.modal-close(onclick="cerrarModal('loginModal')") ×
+          
           if errorLogin
-            p(style="color: red")= errorLogin
-          label Email
-            input(type="email" name="usuarioMail" required)
-          label Contraseña
-          input(type="password" name="usuarioContraseña" required)
-          button(type="submit") Entrar
+            .error-message.cozy-card(style="background: rgba(205, 92, 92, 0.1); border-color: var(--autumn-red);")
+              p= errorLogin
+          
+          form(action="/login" method="POST")
+            .form-group
+              label Email
+              input.cozy-input(type="email" name="usuarioMail" placeholder="tu@email.com" required)
+            
+            .form-group
+              label Contraseña
+              input.cozy-input(type="password" name="usuarioContraseña" placeholder="••••••••" required)
+            
+            button.cozy-button.cozy-button-primary(type="submit" style="width: 100%; justify-content: center;") 
+              | Entrar a mi refugio
 
     .modal#registroModal
-      .modal-contenido
-        button.cerrar(onclick="cerrarModal('registroModal')") ✖
-        form(action="/registro" method="POST" class="formulario")
-          h2 Crear cuenta
+      .modal-backdrop(onclick="cerrarModal('registroModal')")
+      .modal-content
+        .cozy-card
+          .modal-header
+            h2 Únete a SocialArt
+            button.modal-close(onclick="cerrarModal('registroModal')") ×
+          
           if errorRegistro
-              p(style="color: red")= errorRegistro
-          label Nombre completo o alias artistico
-          input(type="text" name="nombreUsuario" required)
-          label Email
-          input(type="text" name="usuarioMail" required)
-          label Contraseña
-          input(type="password" name="usuarioContraseña" required)
-          label Confirmar contraseña
-          input(type="password" name="vUsuarioContraseña" required)
-          button(type="submit") Registrarme
+            .error-message.cozy-card(style="background: rgba(205, 92, 92, 0.1); border-color: var(--autumn-red);")
+              p= errorRegistro
+          
+          form(action="/registro" method="POST")
+            .form-group
+              label Nombre artístico
+              input.cozy-input(type="text" name="nombreUsuario" placeholder="Tu nombre creativo" required)
+            
+            .form-group
+              label Email
+              input.cozy-input(type="email" name="usuarioMail" placeholder="tu@email.com" required)
+            
+            .form-group
+              label Contraseña
+              input.cozy-input(type="password" name="usuarioContraseña" placeholder="Mínimo 6 caracteres" required)
+            
+            .form-group
+              label Confirmar contraseña
+              input.cozy-input(type="password" name="vUsuarioContraseña" placeholder="Repite tu contraseña" required)
+            
+            button.cozy-button.cozy-button-primary(type="submit" style="width: 100%; justify-content: center;") 
+              | Crear mi refugio
+    
 
     script.
       document.addEventListener('DOMContentLoaded', () => {

@@ -1,0 +1,88 @@
+/* Error - Aplicando sistema cozy */
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: var(--space-xl);
+}
+
+.error-card {
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3xl);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  border: 1px solid var(--warm-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.error-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--autumn-red), #dc3545, #c82333);
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-lg);
+  display: block;
+  opacity: 0.8;
+}
+
+.error-title {
+  color: var(--autumn-red);
+  margin-bottom: var(--space-xl);
+  font-size: 2rem;
+  font-family: var(--font-primary);
+}
+
+.error-message {
+  color: var(--warm-gray-600);
+  font-size: 1.1rem;
+  margin-bottom: var(--space-2xl);
+  line-height: 1.6;
+}
+
+.error-message p {
+  margin: 0;
+}
+
+.btn-volver {
+  background: linear-gradient(135deg, var(--autumn-rust), var(--autumn-orange));
+  color: var(--warm-white);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+  display: inline-block;
+  font-family: var(--font-secondary);
+}
+
+.btn-volver:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .error-container {
+    padding: var(--space-lg);
+  }
+
+  .error-card {
+    padding: var(--space-2xl);
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+}

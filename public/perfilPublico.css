@@ -1,0 +1,369 @@
+.perfil-publico-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+}
+
+.perfil-header {
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-2xl);
+  border: 1px solid var(--warm-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.perfil-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--autumn-rust), var(--autumn-gold), var(--autumn-orange));
+}
+
+.perfil-info {
+  display: flex;
+  gap: var(--space-2xl);
+  align-items: flex-start;
+}
+
+.perfil-foto {
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 4px solid var(--warm-white);
+  box-shadow: var(--shadow-md);
+}
+
+.perfil-foto-placeholder {
+  width: 150px;
+  height: 150px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--autumn-rust), var(--autumn-orange));
+  color: var(--warm-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 600;
+  border: 4px solid var(--warm-white);
+  box-shadow: var(--shadow-md);
+}
+
+.perfil-datos {
+  flex: 1;
+}
+
+.perfil-datos h1 {
+  margin: 0 0 var(--space-lg) 0;
+  color: var(--warm-gray-900);
+  font-family: var(--font-primary);
+}
+
+.intereses {
+  color: var(--warm-gray-600);
+  margin-bottom: var(--space-xl);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.seguidores-info {
+  margin-bottom: var(--space-lg);
+  display: flex;
+  gap: var(--space-md);
+}
+
+.seguidores-link {
+  background: linear-gradient(135deg, var(--autumn-sage), var(--autumn-forest));
+  color: var(--warm-white);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+}
+
+.seguidores-link:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.panel-relaciones {
+  background: var(--warm-gray-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  border: 1px solid var(--warm-gray-200);
+}
+
+.estados-relacion {
+  margin-bottom: var(--space-md);
+}
+
+.badges-estado {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.badge-siguiendo {
+  background: linear-gradient(135deg, var(--autumn-forest), var(--autumn-sage));
+  color: var(--warm-white);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.badge-seguidor {
+  background: linear-gradient(135deg, var(--autumn-rust), var(--autumn-orange));
+  color: var(--warm-white);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.solicitud-recibida {
+  margin-bottom: var(--space-md);
+}
+
+.alerta-solicitud {
+  background: rgba(218, 165, 32, 0.1);
+  border: 1px solid rgba(218, 165, 32, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.mensaje-solicitud {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--autumn-brown);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.acciones-solicitud {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.acciones-perfil {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.btn-solicitud,
+.btn-solicitud-enviada,
+.btn-aceptar,
+.btn-dejar-seguir,
+.btn-cancelar-seguimiento {
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  font-family: var(--font-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-solicitud {
+  background: linear-gradient(135deg, var(--autumn-rust), var(--autumn-orange));
+  color: var(--warm-white);
+}
+
+.btn-solicitud:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-solicitud-enviada {
+  background: linear-gradient(135deg, var(--autumn-gold), var(--autumn-brown));
+  color: var(--warm-white);
+}
+
+.btn-solicitud-enviada:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-aceptar {
+  background: linear-gradient(135deg, var(--autumn-forest), var(--autumn-sage));
+  color: var(--warm-white);
+}
+
+.btn-aceptar:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-dejar-seguir {
+  background: linear-gradient(135deg, var(--autumn-red), var(--autumn-brown));
+  color: var(--warm-white);
+}
+
+.btn-dejar-seguir:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-cancelar-seguimiento {
+  background: linear-gradient(135deg, var(--autumn-gold), var(--autumn-brown));
+  color: var(--warm-white);
+}
+
+.btn-cancelar-seguimiento:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.invitado-mensaje {
+  color: var(--warm-gray-600);
+  font-style: italic;
+  padding: var(--space-lg);
+  background: var(--warm-gray-100);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 1rem;
+  border: 1px dashed var(--warm-gray-300);
+}
+
+.info-seguidor {
+  background: rgba(156, 175, 136, 0.1);
+  color: var(--autumn-forest);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  font-size: 0.9rem;
+  border: 1px solid rgba(156, 175, 136, 0.2);
+  text-align: center;
+}
+
+.info-publicos {
+  background: rgba(218, 165, 32, 0.1);
+  color: var(--autumn-brown);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+  font-size: 0.9rem;
+  border: 1px solid rgba(218, 165, 32, 0.2);
+  text-align: center;
+}
+
+.perfil-content h2 {
+  color: var(--warm-gray-900);
+  margin-bottom: var(--space-xl);
+  font-family: var(--font-primary);
+  border-bottom: 3px solid var(--autumn-rust);
+  padding-bottom: var(--space-sm);
+}
+
+.albumes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-lg);
+}
+
+.album-card {
+  background: var(--warm-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--warm-gray-200);
+  transition: all var(--transition-normal);
+}
+
+.album-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.album-card h3 {
+  margin: 0 0 var(--space-sm) 0;
+  font-family: var(--font-primary);
+}
+
+.album-card a {
+  text-decoration: none;
+  color: var(--warm-gray-900);
+  transition: color var(--transition-normal);
+}
+
+.album-card a:hover {
+  color: var(--autumn-rust);
+}
+
+.album-card p {
+  margin: var(--space-sm) 0;
+  color: var(--warm-gray-600);
+  font-size: 0.9rem;
+}
+
+.badge-publico {
+  background: rgba(156, 175, 136, 0.2);
+  color: var(--autumn-forest);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(156, 175, 136, 0.3);
+}
+
+.badge-privado {
+  background: rgba(218, 165, 32, 0.2);
+  color: var(--autumn-brown);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(218, 165, 32, 0.3);
+}
+
+.sin-albumes {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--warm-gray-500);
+  background: var(--warm-gray-50);
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--warm-gray-300);
+}
+
+@media (max-width: 768px) {
+  .perfil-publico-container {
+    padding: var(--space-lg);
+  }
+
+  .perfil-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .seguidores-info {
+    justify-content: center;
+  }
+
+  .albumes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-perfil {
+    flex-direction: column;
+  }
+
+  .badges-estado {
+    justify-content: center;
+  }
+}
